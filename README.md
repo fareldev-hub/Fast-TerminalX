@@ -57,6 +57,7 @@ Setelah itu isi konfigurasi yang diminta, atau masuk ke halaman Admin Panel dan 
 📄 Lisensi
 
 [MIT](LICENSE)
+[Apache License 2.0](LICENSE)
 
 ---
 
