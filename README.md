@@ -1,15 +1,14 @@
-# Fast-TerminalX (Ftermx)
 
-Fast-TerminalX (disingkat **Ftermx**) adalah sebuah aplikasi tunnel SSH yang berjalan di lingkungan Node.js.
+Fast-TerminalX (disingkat **Ftermx**) adalah aplikasi tunnel SSH yang berjalan di lingkungan Node.js.
 
-## 📋 Prasyarat
+📋 Prasyarat
 
 Pastikan Anda telah memenuhi persyaratan berikut sebelum menjalankan Ftermx:
 
-- **Node.js** dan **npm** terinstal di sistem Anda.
-- **SSH client** terinstal.
+- **Node.js** dan **npm** terinstal di sistem Anda
+- **SSH client** terinstal
 
-## 🛠 Instalasi SSH
+🛠 Instalasi SSH
 
 Jika SSH belum terinstal, jalankan perintah berikut:
 
@@ -17,67 +16,60 @@ Jika SSH belum terinstal, jalankan perintah berikut:
 sudo apt install openssh-client
 ```
 
-> **Catatan:** Perintah di atas untuk distribusi Linux berbasis Debian/Ubuntu. Untuk sistem operasi lain, sesuaikan dengan package manager masing-masing.
+> *Catatan:* Perintah di atas untuk distribusi Linux berbasis Debian/Ubuntu. Untuk sistem operasi lain, sesuaikan dengan package manager masing-masing.
 
-## 📦 Instalasi Ftermx
+📦 Instalasi Ftermx
 
 Instal Ftermx secara global menggunakan npm:
-
 ```bash
 npm install -g f-termx
 ```
 
-## 🚀 Menjalankan Ftermx
+🚀 Cara Menjalankan Ftermx
 
-Setelah instalasi selesai, Anda dapat menjalankan Ftermx dengan perintah:
-
-```bash
-ftermx
-```
-
-Start server
 ```bash
 ftermx start
 ```
 
-Pilih opsi yang telah di sediakan
-- Local
-- Ngrok
-- Servo.net
+Setelah instalasi selesai, jalankan Ftermx dengan:
+ftermx
+Untuk memulai server:
+ftermx start
+Pilih salah satu opsi yang tersedia:
+- `local`
+- `ngrok` 
+- `serveo.net`
 
-Jika membutuhkan bantuan ketik perintah
-
-```bash
-ftermx -help
+Butuh bantuan? Ketik:
+```bash ftermx --help
 ```
 
-## Admin Access
-kami menyediakan admin panel pada tools ini
+## 👑 Akses Admin
+Kami menyediakan panel admin di tools ini.
 
-contoh perintah untuk menambah user
-
+Contoh perintah untuk menambah user:
 ```bash
 ftermx add user
 ```
-Setelah itu silahkan isi semua configurasi atau masuk ke halaman admin panel dan tambahkan User sesuai kebutuhan
+Setelah itu isi konfigurasi yang diminta, atau masuk ke halaman Admin Panel dan tambahkan user sesuai kebutuhan.
 
-## 📄 Lisensi
+📄 Lisensi
 
 [MIT](LICENSE)
 
 ---
 
-**Dibuat dengan ❤️ oleh FarelDev**
+*Dibuat dengan ❤️ oleh FarelDev*
 
 <table>
   <tr>
     <td align="center">
-      <a href="[(https://trakteer.id/farel_alfarez)]">
-        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" />
+      <a href="https://trakteer.id/farel_alfarez" target="_blank">
+        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Trakteer FarelDev" width="200" />
       </a>
     </td>
     <td align="center">
-      <a href="https://farelsite.pages.dev">
+      <a href="https://farelsite.pages.dev" target="_blank">
         <img src="https://img.shields.io/badge/🌐-Kunjungi_FarelSite-0056D2?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Kunjungi FarelSite" />
       </a>
     </td>
