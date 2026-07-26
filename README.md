@@ -71,7 +71,7 @@ Setelah itu isi konfigurasi yang diminta, atau masuk ke halaman Admin Panel dan 
     </td>
     <td align="center">
       <a href="https://farelsite.pages.dev" target="_blank">
-        <img src="https://img.shields.io/badge/🌐-Kunjungi_FarelSite-0056D2?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Kunjungi FarelSite" />
+        <img src="https://img.shields.io/badge/Kunjungi_Farelsite-0056D2?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Kunjungi" />
       </a>
     </td>
   </tr>
