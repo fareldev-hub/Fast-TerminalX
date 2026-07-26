@@ -1,5 +1,3 @@
-Berikut adalah perbaikan untuk `readme.md` Anda:
-
 # Fast-TerminalX (Ftermx)
 
 Fast-TerminalX (disingkat **Ftermx**) adalah sebuah aplikasi tunnel SSH yang berjalan di lingkungan Node.js.
