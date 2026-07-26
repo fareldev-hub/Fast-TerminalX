@@ -41,7 +41,8 @@ Pilih salah satu opsi yang tersedia:
 - `serveo.net`
 
 Butuh bantuan? Ketik:
-```bash ftermx --help
+```bash
+ftermx -help
 ```
 
 ## 👑 Akses Admin
