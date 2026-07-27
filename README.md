@@ -49,16 +49,15 @@ Untuk memilih gunakan tombol panah atas/bawah pada keyboard komputer anda
 Jika selesai masukkan port (pastikan gunakan port yang belum di jalankan di komputer anda)
 ![port](doc/step5.png)
 
-Jika selesai hasilnya akan terlihat seperti gambar berikut ;
+Jika selesai hasilnya akan terlihat seperti gambar berikut :
 ![result](doc/step6.png)
 
-untuk menjalankan servernya buka tab browser anda dan masukkan alamat localhost anda pada pencarian browser contohnya seperti :
+Untuk menjalankan servernya buka tab browser anda dan masukkan alamat localhost anda pada pencarian browser contohnya seperti :
 
 ```bash
 localhost:1010
 ```
-
-**PENJELASAN** sesuaikan localhost dengan port yang anda telah input 
+bagian angka **1010** Sesuaikan dengan  angka port yang anda telah input.
 
 Butuh bantuan? Ketik:
 ```bash
@@ -75,14 +74,14 @@ ftermx add user
 Setelah itu isi konfigurasi yang diminta, atau masuk ke halaman Admin Panel dan tambahkan user sesuai kebutuhan.
 
 ## Halaman ftermx
-saat pertama kali masuk ke website anda harus login terlebih dahulu :
+Saat pertama kali masuk ke website anda harus login terlebih dahulu :
 ![image](doc/step7.png)
 
 Jika anda belum menambahkan user ke dalam ftermx isi dengan informasi berikut :
 
 Untuk username : 
 ```bash
-Admin
+admin
 ```
 untuk password
 ```bash
