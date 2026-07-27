@@ -1,3 +1,5 @@
+![Dev Ftermx](thumbnail/thumb.png)
+
 ## Informasi
 Fast-TerminalX (disingkat **Ftermx**) adalah aplikasi tunnel SSH yang berjalan di lingkungan Node.js.
 
