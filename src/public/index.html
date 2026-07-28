@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#030509">
+    <title>Ftermx — Web Terminal</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+    <script src="/js/dialog.js"></script>
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="app-layout">
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+                    <div class="logo-text-wrap">
+                        <span class="logo-text">Ftermx</span>
+                        <span class="logo-badge" id="appVersion">…</span>
+                    </div>
+                </div>
+                <button class="sidebar-close-btn" id="sidebarCloseBtn" title="Close sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="user-chip" id="userChip">
+                <div class="user-chip-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-chip-info">
+                    <span class="user-chip-name" id="userChipName">…</span>
+                    <span class="user-chip-role" id="userChipRole">…</span>
+                </div>
+                <button class="user-chip-logout" id="logoutBtn" title="Sign out"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="terminal" title="Terminal">
+                    <i class="fas fa-terminal"></i>
+                    <span>Terminal</span>
+                </button>
+                <button class="nav-item" data-page="files" title="Files">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Files</span>
+                </button>
+                <button class="nav-item" data-page="connect" title="Connect">
+                    <i class="fas fa-plug"></i>
+                    <span>Connect</span>
+                </button>
+                <button class="nav-item admin-only hidden" data-page="admin" title="Admin">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Admin</span>
+                </button>
+                <button class="nav-item" data-page="packages" title="Packages">
+                    <i class="fas fa-box-open"></i>
+                    <span>Packages</span>
+                </button>
+                <button class="nav-item" data-page="about" title="About">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About</span>
+                </button>
+                <button class="nav-item" data-page="donate" title="Donate">
+                    <i class="fas fa-heart"></i>
+                    <span>Donate</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <button class="btn btn-primary btn-sidebar-new" id="sidebarNewTermBtn">
+                <i class="fas fa-plus"></i> New Terminal
+            </button>
+
+            <div class="sidebar-sessions">
+                <p class="sidebar-section-label">SESSIONS</p>
+                <div id="sessionList">
+                    <p class="no-sessions">No active sessions</p>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="sidebar-author">
+                    <i class="fas fa-user-circle"></i> Farel Alfareza
+                </span>
+            </div>
+        </aside>
+
+        <!-- ── Main content ────────────────────────────────────────────── -->
+        <div class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <span class="header-title" id="headerTitle">Terminal</span>
+                </div>
+                <div class="header-right">
+                    <span class="connection-status" id="connectionStatus">
+                        <span class="dot-live"></span>
+                        <span id="connectionText">Connecting…</span>
+                    </span>
+                    <button class="btn btn-primary" id="newTerminalBtn">
+                        <i class="fas fa-plus"></i>
+                        <span class="btn-label">New Terminal</span>
+                    </button>
+                    <span class="session-count" id="sessionCount" style="display:none;">
+                        <i class="fas fa-layer-group"></i>
+                        <span id="sessionCountNum">0</span>
+                    </span>
+                    <button class="btn btn-danger" id="killAllBtn" style="display:none;">
+                        <i class="fas fa-power-off"></i>
+                        <span class="btn-label">Kill All</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="pages-container">
+
+                <!-- ── Terminal page ────────────────────────────────── -->
+                <div class="page page-terminal active" id="pagTerminal">
+                    <div class="terminal-grid is-empty" id="terminalGrid">
+                        <div class="empty-state">
+                            <div class="empty-state-icon"><i class="fas fa-terminal"></i></div>
+                            <h3>Ftermx Ready</h3>
+                            <p>Click <strong>New Terminal</strong> to spawn a shell on this server</p>
+                            <p class="author">by Farel Alfareza</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── File Manager page ────────────────────────────── -->
+                <div class="page page-files" id="pagFiles">
+                    <div class="fm-layout">
+                        <!-- Toolbar -->
+                        <div class="fm-toolbar">
+                            <div class="fm-toolbar-left">
+                                <button class="fm-btn" id="fmUpBtn" title="Go up"><i class="fas fa-level-up-alt"></i></button>
+                                <div class="fm-breadcrumb" id="fmBreadcrumb"></div>
+                            </div>
+                            <div class="fm-toolbar-right">
+                                <button class="fm-btn fm-btn-primary" id="fmNewFolderBtn" title="New Folder">
+                                    <i class="fas fa-folder-plus"></i> <span class="fm-btn-label">New Folder</span>
+                                </button>
+                                <button class="fm-btn fm-btn-primary" id="fmNewFileBtn" title="New File">
+                                    <i class="fas fa-file-circle-plus"></i> <span class="fm-btn-label">New File</span>
+                                </button>
+                                <label class="fm-btn fm-btn-primary" id="fmUploadLabel" title="Upload">
+                                    <i class="fas fa-upload"></i> <span class="fm-btn-label">Upload</span>
+                                    <input type="file" id="fmUploadInput" multiple style="display:none">
+                                </label>
+                                <button class="fm-btn" id="fmSelectModeBtn" title="Select">
+                                    <i class="fas fa-check-square"></i> <span class="fm-btn-label">Select</span>
+                                </button>
+                                <button class="fm-btn fm-btn-danger hidden" id="fmDeleteSelBtn" title="Delete selected">
+                                    <i class="fas fa-trash"></i> <span class="fm-btn-label">Delete</span>
+                                </button>
+                                <button class="fm-btn hidden" id="fmZipSelBtn" title="Zip selected">
+                                    <i class="fas fa-file-zipper"></i> <span class="fm-btn-label">Zip</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Selection info bar -->
+                        <div class="fm-sel-bar hidden" id="fmSelBar">
+                            <span id="fmSelCount">0 items selected</span>
+                            <button class="fm-btn fm-btn-sm" id="fmSelAllBtn"><i class="fas fa-check-double"></i> All</button>
+                            <button class="fm-btn fm-btn-sm" id="fmSelNoneBtn"><i class="fas fa-square"></i> None</button>
+                        </div>
+
+                        <!-- File list -->
+                        <div class="fm-content" id="fmContent">
+                            <div class="fm-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+                        </div>
+
+                        <!-- Status bar -->
+                        <div class="fm-statusbar" id="fmStatusBar">Ready</div>
+                    </div>
+                </div>
+
+                <!-- ── Connect page ─────────────────────────────────── -->
+                <div class="page page-connect" id="pagConnect">
+                    <div class="connect-container">
+                        <div class="page-hero">
+                            <div class="page-hero-icon cyan"><i class="fas fa-plug"></i></div>
+                            <h1>Connect</h1>
+                            <p>Open a new session using SSH or a public tunnel</p>
+                        </div>
+
+                        <div class="connect-grid">
+                            <!-- SSH -->
+                            <div class="connect-card" id="sshCard">
+                                <div class="connect-card-icon blue"><i class="fas fa-network-wired"></i></div>
+                                <div class="connect-card-body">
+                                    <h3>SSH Connect</h3>
+                                    <p>Connect to a remote server via SSH directly in the browser.</p>
+                                </div>
+                                <button class="btn btn-primary connect-card-btn" id="openSshDialog">
+                                    <i class="fas fa-arrow-right"></i> Connect
+                                </button>
+                            </div>
+
+                            <!-- Ngrok -->
+                            <div class="connect-card admin-only hidden" id="ngrokCard">
+                                <div class="connect-card-icon orange"><i class="fas fa-cloud"></i></div>
+                                <div class="connect-card-body">
+                                    <h3>Ngrok Tunnel</h3>
+                                    <p>Create a secure HTTPS tunnel with your ngrok auth token.</p>
+                                </div>
+                                <button class="btn btn-primary connect-card-btn" id="openNgrokDialog">
+                                    <i class="fas fa-play"></i> Connect
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- Tunnel status card -->
+                        <div class="tunnel-status-card" id="tunnelStatusCard" style="display:none;">
+                            <div class="tunnel-status-header">
+                                <i class="fas fa-circle-check" style="color:var(--neon-green)"></i>
+                                <span>Active Tunnel</span>
+                                <span class="tunnel-status-type" id="tunnelStatusType"></span>
+                            </div>
+                            <div class="tunnel-status-url" id="tunnelStatusUrl">—</div>
+                            <div style="display:flex;gap:6px;flex-shrink:0;">
+                                <button class="btn btn-small" id="copyTunnelUrl"><i class="fas fa-copy"></i> Copy</button>
+                                <button class="btn btn-small btn-danger" id="stopTunnelBtn"><i class="fas fa-stop"></i> Stop</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Admin page ───────────────────────────────────── -->
+                <div class="page page-admin admin-only" id="pagAdmin">
+                    <div class="admin-container">
+                        <div class="page-hero">
+                            <div class="page-hero-icon purple"><i class="fas fa-shield-alt"></i></div>
+                            <h1>Admin Panel</h1>
+                            <p>Manage users and monitor tunnel performance</p>
+                        </div>
+
+                        <div class="admin-section">
+                            <div class="admin-section-title">
+                                <i class="fas fa-chart-line"></i> Tunnel Monitor
+                                <button class="btn btn-small" id="refreshTunnelStats"><i class="fas fa-sync-alt"></i> Refresh</button>
+                            </div>
+                            <div class="stats-grid" id="statsGrid">
+                                <div class="stat-card">
+                                    <div class="stat-label">Status</div>
+                                    <div class="stat-value" id="statStatus">—</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Type</div>
+                                    <div class="stat-value" id="statType">—</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Uptime</div>
+                                    <div class="stat-value" id="statUptime">—</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Sessions</div>
+                                    <div class="stat-value" id="statSessions">—</div>
+                                </div>
+                            </div>
+                            <div class="stat-url-row" id="statUrlRow" style="display:none;">
+                                <span class="stat-url-label">URL</span>
+                                <span class="stat-url" id="statUrl">—</span>
+                                <button class="btn btn-small" id="copyStatUrl"><i class="fas fa-copy"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="admin-section">
+                            <div class="admin-section-title">
+                                <i class="fas fa-users"></i> Users
+                                <button class="btn btn-primary btn-small" id="openAddUser">
+                                    <i class="fas fa-user-plus"></i> Add User
+                                </button>
+                            </div>
+                            <div id="userTable" class="user-table">
+                                <div class="user-table-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Packages page ───────────────────────────────── -->
+                <div class="page page-packages" id="pagPackages">
+                    <div class="pkg-container">
+                        <div class="page-hero">
+                            <div class="page-hero-icon green"><i class="fas fa-box-open"></i></div>
+                            <h1>Package Installer</h1>
+                            <p>Install system packages on the server via <code>apt-get</code></p>
+                        </div>
+
+                        <div class="pkg-input-card">
+                            <div class="pkg-prompt-row">
+                                <span class="pkg-prompt-label"><i class="fas fa-terminal"></i> apt-get install -y</span>
+                                <input type="text" id="pkgInput" class="pkg-input"
+                                    placeholder="Pack Name"
+                                    autocomplete="off" spellcheck="false">
+                                <button class="btn btn-primary" id="pkgInstallBtn">
+                                    <i class="fas fa-download"></i>
+                                    <span class="btn-label">Install</span>
+                                </button>
+                            </div>
+                            <div class="pkg-quick-row">
+                                <span class="pkg-quick-label">Quick:</span>
+                                <button class="pkg-chip" data-pkg="nodejs">nodejs</button>
+                                <button class="pkg-chip" data-pkg="python3">python3</button>
+                                <button class="pkg-chip" data-pkg="nginx">nginx</button>
+                                <button class="pkg-chip" data-pkg="git">git</button>
+                                <button class="pkg-chip" data-pkg="curl">curl</button>
+                                <button class="pkg-chip" data-pkg="wget">wget</button>
+                                <button class="pkg-chip" data-pkg="docker.io">docker</button>
+                            </div>
+                        </div>
+
+                        <div class="pkg-term-card" id="pkgTermCard">
+                            <div class="pkg-term-toolbar">
+                                <div class="toolbar-left">
+                                    <span class="dot red"></span>
+                                    <span class="dot yellow"></span>
+                                    <span class="dot green"></span>
+                                </div>
+                                <div class="toolbar-center" id="pkgTermTitle">
+                                    <i class="fas fa-square-terminal"></i> output
+                                </div>
+                                <div class="toolbar-right">
+                                    <span class="pkg-status-badge" id="pkgStatusBadge"></span>
+                                    <button class="toolbar-btn danger hidden" id="pkgCancelBtn" title="Cancel installation">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                    <button class="toolbar-btn" id="pkgClearBtn" title="Clear output">
+                                        <i class="fas fa-eraser"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <pre class="pkg-output" id="pkgOutput"><span class="pkg-placeholder">Ready — enter package name(s) above and click Install.</span></pre>
+                            <!-- stdin prompt bar — shown when process awaits input -->
+                            <div class="pkg-stdin-row hidden" id="pkgStdinRow">
+                                <span class="pkg-stdin-label"><i class="fas fa-keyboard"></i> Input required</span>
+                                <div class="pkg-stdin-inner">
+                                    <span class="pkg-stdin-caret">›</span>
+                                    <input type="text" id="pkgStdinInput" class="pkg-stdin-input"
+                                           placeholder="Type your response…" autocomplete="off" spellcheck="false" />
+                                    <button class="pkg-stdin-quick" id="pkgStdinY" title="Send Y (yes)">Y</button>
+                                    <button class="pkg-stdin-quick" id="pkgStdinN" title="Send N (no)">N</button>
+                                    <button class="pkg-stdin-quick enter" id="pkgStdinEnter" title="Send Enter (empty line)">↵</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── About page ───────────────────────────────────── -->
+                <div class="page page-about" id="pagAbout">
+                    <div class="about-container">
+                        <div class="about-hero">
+                            <div class="about-logo-wrap">
+                                <div class="about-logo-icon"><i class="fas fa-terminal"></i></div>
+                                <div>
+                                    <h1 class="about-title">Ftermx</h1>
+                                    <span class="about-ver" id="aboutVersion">…</span>
+                                </div>
+                            </div>
+                            <p class="about-tagline">Fast Terminal X</p>
+                        </div>
+                        <div class="about-grid">
+                            <div class="about-card">
+                                <div class="about-card-icon cyan"><i class="fas fa-globe"></i></div>
+                                <h3>What is Ftermx?</h3>
+                                <p>Browser-based terminal with direct shell access, multi-session, SSH connect, file manager, and public tunnel support.</p>
+                            </div>
+                            <div class="about-card">
+                                <div class="about-card-icon purple"><i class="fas fa-shield-alt"></i></div>
+                                <h3>Auth &amp; Roles</h3>
+                                <p>Login-protected with role-based access. Each user gets their own workspace at <code>/ftermx/&lt;username&gt;</code>.</p>
+                            </div>
+                            <div class="about-card">
+                                <div class="about-card-icon green"><i class="fas fa-folder-open"></i></div>
+                                <h3>File Manager</h3>
+                                <p>Upload, create, delete, extract zip/tar archives, multi-select, and manage files directly in the browser.</p>
+                            </div>
+                            <div class="about-card">
+                                <div class="about-card-icon orange"><i class="fas fa-cloud"></i></div>
+                                <h3>Tunneling</h3>
+                                <p>Expose publicly via <strong>ngrok</strong> — secure HTTPS tunnel via pure Node.js, no system tools needed.</p>
+                            </div>
+                        </div>
+                        <div class="about-stack">
+                            <h3 class="about-section-title"><i class="fas fa-code"></i> Tech Stack</h3>
+                            <div class="stack-badges">
+                                <span class="stack-badge">Node.js</span>
+                                <span class="stack-badge">Express</span>
+                                <span class="stack-badge">Socket.IO</span>
+                                <span class="stack-badge">node-pty</span>
+                                <span class="stack-badge">xterm.js</span>
+                                <span class="stack-badge">SSH2</span>
+                                <span class="stack-badge">@ngrok/ngrok</span>
+                            </div>
+                        </div>
+                        <div class="about-author-card">
+                            <div class="author-avatar"><i class="fas fa-user-astronaut"></i></div>
+                            <div class="author-info-block">
+                                <h3>Farel Alfareza</h3>
+                                <p>Creator &amp; Developer of Ftermx</p>
+                                <a href="https://farelsite.pages.dev" target="_blank" rel="noopener" class="author-link">
+                                    <i class="fas fa-external-link-alt"></i> farelsite.pages.dev
+                                </a>
+                            </div>
+                        </div>
+                        <p class="about-license">Open source · MIT License · Made with <span class="heart">♥</span> by Farel Alfareza</p>
+                    </div>
+                </div>
+
+                <!-- ── Donate page ──────────────────────────────────── -->
+                <div class="page page-donate" id="pagDonate">
+                    <div class="donate-container">
+                        <div class="donate-hero">
+                            <div class="donate-icon"><i class="fas fa-heart"></i></div>
+                            <h1>Support Ftermx</h1>
+                            <p>Ftermx is free and open source. If it saves you time or you enjoy using it, consider buying me a coffee ☕</p>
+                        </div>
+                        <div class="donate-grid">
+                            <a href="https://trakteer.id/farel_alfarez/gift" target="_blank" rel="noopener" class="donate-card kofi">
+                                <div class="donate-card-icon"><i class="fas fa-mug-hot"></i></div>
+                                <div class="donate-card-info">
+                                    <h3>Ko-fi</h3>
+                                    <p>Buy me a coffee — quick &amp; easy one-time donation</p>
+                                </div>
+                                <i class="fas fa-arrow-right donate-arrow"></i>
+                            </a>
+                            <a href="https://saweria.co/fareldev" target="_blank" rel="noopener" class="donate-card saweria">
+                                <div class="donate-card-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                                <div class="donate-card-info">
+                                    <h3>Saweria</h3>
+                                    <p>Indonesian local donation platform — bayar pakai e-wallet</p>
+                                </div>
+                                <i class="fas fa-arrow-right donate-arrow"></i>
+                            </a>
+                        </div>
+                        <div class="donate-note">
+                            <i class="fas fa-info-circle"></i>
+                            Every contribution, big or small, helps keep Ftermx maintained and improved. Thank you! 🙏
+                        </div>
+                        <div class="donate-author">
+                            <span>— Farel Alfareza</span>
+                            <a href="https://farelsite.pages.dev" target="_blank" rel="noopener">farelsite.pages.dev</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /pages-container -->
+        </div><!-- /main-content -->
+    </div><!-- /app-layout -->
+
+    <!-- ── SSH Dialog ────────────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="sshModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-network-wired"></i> SSH Connect</div>
+                <button class="modal-close" id="closeSshModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Host</label>
+                    <input type="text" id="sshHost" placeholder="192.168.1.1 or example.com">
+                </div>
+                <div class="modal-row2">
+                    <div class="modal-field">
+                        <label>Port</label>
+                        <input type="number" id="sshPort" value="22" min="1" max="65535">
+                    </div>
+                    <div class="modal-field">
+                        <label>Username</label>
+                        <input type="text" id="sshUser" placeholder="root">
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>Password</label>
+                    <input type="password" id="sshPass" placeholder="••••••••">
+                </div>
+                <div class="modal-error hidden" id="sshError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelSshBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmSshBtn"><i class="fas fa-sign-in-alt"></i> Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Ngrok Dialog ──────────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="ngrokModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-cloud"></i> Ngrok Tunnel</div>
+                <button class="modal-close" id="closeNgrokModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-info">Enter your ngrok auth token to start a secure public HTTPS tunnel. Get yours at <a href="https://dashboard.ngrok.com" target="_blank" style="color:var(--neon-cyan)">dashboard.ngrok.com</a></p>
+                <div class="modal-field">
+                    <label>Auth Token</label>
+                    <input type="text" id="ngrokToken" placeholder="2abc...xyz_your_token">
+                </div>
+                <div class="modal-error hidden" id="ngrokError"></div>
+                <div class="modal-success hidden" id="ngrokSuccess">
+                    <i class="fas fa-circle-check"></i>
+                    <div>
+                        <div class="modal-success-label">Tunnel started!</div>
+                        <a href="#" target="_blank" id="ngrokUrl" class="modal-success-url"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelNgrokBtn">Close</button>
+                <button class="btn btn-primary" id="confirmNgrokBtn"><i class="fas fa-play"></i> Start Tunnel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Add User Dialog ───────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="addUserModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-user-plus"></i> Add User</div>
+                <button class="modal-close" id="closeAddUserModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Username</label>
+                    <input type="text" id="newUsername" placeholder="username" autocomplete="off">
+                </div>
+                <div class="modal-field">
+                    <label>Password</label>
+                    <input type="password" id="newPassword" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div class="modal-field">
+                    <label>Role</label>
+                    <select id="newRole">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="modal-field">
+                    <label>Auto-delete after</label>
+                    <select id="newExpiry">
+                        <option value="">Never</option>
+                        <option value="1h">1 Hour</option>
+                        <option value="6h">6 Hours</option>
+                        <option value="12h">12 Hours</option>
+                        <option value="1d">1 Day</option>
+                        <option value="3d">3 Days</option>
+                        <option value="7d">7 Days</option>
+                        <option value="30d">30 Days</option>
+                        <option value="90d">90 Days</option>
+                    </select>
+                </div>
+                <div class="modal-info" style="margin-top:4px;">
+                    <i class="fas fa-info-circle" style="color:var(--neon-cyan)"></i>
+                    User will access: <code style="color:var(--neon-cyan)">/ftermx/&lt;username&gt;</code>
+                </div>
+                <div class="modal-error hidden" id="addUserError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelAddUserBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmAddUserBtn"><i class="fas fa-user-plus"></i> Add User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Edit User Dialog ──────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="editUserModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-user-edit"></i> Edit User — <span id="editUserTarget"></span></div>
+                <button class="modal-close" id="closeEditUserModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>New Username <span style="color:var(--text-dim);font-weight:400">(leave blank to keep)</span></label>
+                    <input type="text" id="editUsername" placeholder="new username" autocomplete="off">
+                </div>
+                <div class="modal-field">
+                    <label>New Password <span style="color:var(--text-dim);font-weight:400">(leave blank to keep)</span></label>
+                    <input type="password" id="editPassword" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div class="modal-field">
+                    <label>Auto-delete after</label>
+                    <select id="editExpiry">
+                        <option value="">Never</option>
+                        <option value="1h">1 Hour</option>
+                        <option value="6h">6 Hours</option>
+                        <option value="12h">12 Hours</option>
+                        <option value="1d">1 Day</option>
+                        <option value="3d">3 Days</option>
+                        <option value="7d">7 Days</option>
+                        <option value="30d">30 Days</option>
+                        <option value="90d">90 Days</option>
+                    </select>
+                </div>
+                <div class="modal-error hidden" id="editUserError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelEditUserBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmEditUserBtn"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── New Folder Dialog ─────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="newFolderOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-folder-plus"></i> New Folder</div>
+                <button class="modal-close" onclick="document.getElementById('newFolderOverlay').classList.add('hidden')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Folder Name</label>
+                    <input type="text" id="newFolderName" placeholder="my-folder" autocomplete="off">
+                </div>
+                <div class="modal-error hidden" id="newFolderError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="document.getElementById('newFolderOverlay').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary" id="confirmNewFolder"><i class="fas fa-check"></i> Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── New File Dialog ───────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="newFileOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-file-circle-plus"></i> New File</div>
+                <button class="modal-close" onclick="document.getElementById('newFileOverlay').classList.add('hidden')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>File Name</label>
+                    <input type="text" id="newFileName" placeholder="file.txt" autocomplete="off">
+                </div>
+                <div class="modal-error hidden" id="newFileError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="document.getElementById('newFileOverlay').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary" id="confirmNewFile"><i class="fas fa-check"></i> Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Rename Dialog ─────────────────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="renameOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-pen"></i> Rename</div>
+                <button class="modal-close" onclick="document.getElementById('renameOverlay').classList.add('hidden')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>New Name</label>
+                    <input type="text" id="renameName" placeholder="new-name" autocomplete="off">
+                </div>
+                <div class="modal-error hidden" id="renameError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="document.getElementById('renameOverlay').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary" id="confirmRename"><i class="fas fa-check"></i> Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
+    <script src="/js/terminal.js"></script>
+    <script src="/js/admin.js"></script>
+    <script src="/js/filemanager.js"></script>
+</body>
+</html>
