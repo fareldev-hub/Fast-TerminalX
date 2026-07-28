@@ -1,100 +1,99 @@
+
 ![Dev Ftermx](thumbnail/thumb.png)
 
-## Informasi
-Fast-TerminalX (disingkat **Ftermx**) adalah aplikasi tunnel SSH yang berjalan di lingkungan Node.js.
+## Information
+Fast-TerminalX (abbreviated **Ftermx**) is an SSH tunnel application that runs in the Node.js environment.
 
-Pastikan Anda telah memenuhi persyaratan berikut sebelum menjalankan Ftermx:
-- **Nodejs** - **SSH client**  dan **npm** terinstal di sistem Anda
+Make sure you have met the following requirements before running Ftermx:
+- **Nodejs** - **SSH client** and **npm** installed on your system
 
-## Instalasi SSH
+## SSH Installation
 
-Jika SSH belum terinstal, jalankan perintah berikut:
+If SSH is not yet installed, run the following command:
 
 ```bash
 sudo apt install openssh-client
 ```
 
-> *Catatan:* Perintah di atas untuk distribusi Linux berbasis Debian/Ubuntu. Untuk sistem operasi lain, sesuaikan dengan package manager masing-masing.
+> *Note:* The above command is for Debian/Ubuntu-based Linux distributions. For other operating systems, adjust according to your respective package manager.
 
-## Instalasi Ftermx
+## Ftermx Installation
 
-Instal Ftermx secara global menggunakan npm:
+Install Ftermx globally using npm:
 ```bash
 npm install -g f-termx
 ```
 
 ![Install Ftermx](doc/step1.png)
 
-
-Setelah instalasi selesai, jalankan perintah :
+After installation is complete, run the command:
 ```bash
 ftermx
 ```
-Maka tampilannya akan menjadi seperti gambar ini
+The display will look like this
 ![Menu](doc/step2.png)
 
-
-untuk memulai Ftermx Ketik perintah :
+To start Ftermx, type the command:
 ```bash
 ftermx start
 ```
 
 ![start](doc/step4.png)
-Pilih salah satu opsi yang tersedia:
+Select one of the available options:
 - `local`
-- `ngrok` 
+- `ngrok`
 
-Untuk memilih gunakan tombol panah atas/bawah pada keyboard komputer anda
+To select, use the up/down arrow keys on your keyboard
 
-Jika selesai masukkan port (pastikan gunakan port yang belum di jalankan di komputer anda)
+Once done, enter the port (make sure to use a port that is not currently running on your computer)
 ![port](doc/step5.png)
 
-Jika selesai hasilnya akan terlihat seperti gambar berikut :
+When finished, the result will look like the following image:
 ![result](doc/step6.png)
 
-Untuk menjalankan servernya buka tab browser anda dan masukkan alamat localhost anda pada pencarian browser contohnya seperti :
+To run the server, open a browser tab and enter your localhost address in the browser search bar, for example:
 
 ```bash
 localhost:1010
 ```
-bagian angka **1010** Sesuaikan dengan  angka port yang anda telah input.
+The number **1010** should match the port number you entered.
 
-Butuh bantuan? Ketik:
+Need help? Type:
 ```bash
 ftermx -help
 ```
 
-## Akses Admin
-Kami menyediakan panel admin di tools ini.
+## Admin Access
+We provide an admin panel in this tool.
 
-Contoh perintah untuk menambah user:
+Example command to add a user:
 ```bash
 ftermx add user
 ```
-Setelah itu isi konfigurasi yang diminta, atau masuk ke halaman Admin Panel dan tambahkan user sesuai kebutuhan.
+After that, fill in the requested configuration, or go to the Admin Panel page and add users as needed.
 
-## Halaman ftermx
-Saat pertama kali masuk ke website anda harus login terlebih dahulu :
+## Ftermx Pages
+When you first enter the website, you must log in first:
 ![image](doc/step7.png)
 
-Jika anda belum menambahkan user ke dalam ftermx isi dengan informasi berikut :
+If you haven't added a user to ftermx, fill in with the following information:
 
-Untuk username : 
+Username: 
 ```bash
 admin
 ```
-untuk password
+Password:
 ```bash
 admin
 ```
 
-## Dokumentasi Halaman ftermx
+## Ftermx Page Documentation
 ![image](doc/step8.png)
 
-**Akses terminal**
+**Terminal Access**
 ![image](doc/step9.png)
 
-**Install Paket yang di inginkan**
+**Install Desired Packages**
 ![image](doc/step10.png)
 
 **Admin Panel**
@@ -103,16 +102,16 @@ admin
 **File Manager**
 ![image](doc/step12.png)
 
-**Informasi**
+**Information**
 
 ![npm downloads](https://img.shields.io/npm/dt/f-termx) ![npm versions](https://img.shields.io/npm/v/f-termx?label=versions)
 
-**Lisensi**
+**License**
 [Apache License 2.0](LICENSE)
 
 ---
 
-*Dibuat dengan ❤️ oleh FarelDev*
+*Made with ❤️ by FarelDev*
 
 <a href="https://saweria.co/farelalfareza">
   <img src="https://img.shields.io/badge/donate-FF5C00?style=for-the-badge" />
