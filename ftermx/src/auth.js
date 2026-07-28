@@ -1,3 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 'use strict';
 
 const fs = require('fs');
@@ -7,14 +24,12 @@ const crypto = require('crypto');
 const DATA_DIR = path.join(__dirname, '../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
-// ── Password hashing (built-in crypto, no native deps) ────────────────────────
 function hashPassword(password) {
     return crypto.createHmac('sha256', 'ftermx-secret-salt')
         .update(password)
         .digest('hex');
 }
 
-// ── User store ────────────────────────────────────────────────────────────────
 function ensureDataDir() {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, {
         recursive: true
@@ -70,7 +85,7 @@ function deleteUser(username) {
     const before = users.length;
     users = users.filter(u => u.username !== username);
     if (users.length === before) throw new Error(`User "${username}" not found`);
-    // Always keep at least one admin
+    
     if (!users.find(u => u.role === 'admin')) {
         throw new Error('Cannot delete last admin');
     }
@@ -84,7 +99,7 @@ function updateUser(username, updates = {}) {
 
     const user = users[idx];
 
-    // Rename
+    
     if (updates.username && updates.username !== username) {
         if (users.find(u => u.username === updates.username)) {
             throw new Error(`Username "${updates.username}" already taken`);
@@ -92,12 +107,12 @@ function updateUser(username, updates = {}) {
         user.username = updates.username;
     }
 
-    // New password
+    
     if (updates.password) {
         user.password = hashPassword(updates.password);
     }
 
-    // Expiry (null = never, ISO string = expire at that time)
+    
     if ('expireAt' in updates) {
         user.expireAt = updates.expireAt || null;
     }
@@ -115,16 +130,15 @@ function purgeExpiredUsers() {
         return new Date(u.expireAt).getTime() > now;
     });
     if (active.length !== users.length) {
-        // Keep at least one admin
+        
         if (!active.find(u => u.role === 'admin')) return;
         saveUsers(active);
     }
 }
 
-// ── Express middleware ────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
     if (req.session && req.session.user) return next();
-    // API calls get JSON error; page requests get redirect
+    
     if (req.path.startsWith('/api/') || req.headers['x-requested-with'] === 'XMLHttpRequest') {
         return res.status(401).json({
             error: 'Not authenticated'
@@ -143,7 +157,6 @@ function requireAdmin(req, res, next) {
     res.status(403).send('Forbidden');
 }
 
-// Initialise users file on first load
 loadUsers();
 
 module.exports = {

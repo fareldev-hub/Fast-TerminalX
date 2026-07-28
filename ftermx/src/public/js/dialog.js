@@ -1,12 +1,24 @@
-// ─── Ftermx Custom Dialog System ─────────────────────────────────────────────
-// FxAlert(message, opts?)  → Promise<void>
-// FxConfirm(message, opts?) → Promise<boolean>
-// opts: { title, icon, type: 'danger'|'warning'|'info'|'success' }
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 
 (function () {
     'use strict';
 
-    // ── Inject styles once ────────────────────────────────────────────────────
+    
     const STYLE_ID = 'fx-dialog-styles';
     if (!document.getElementById(STYLE_ID)) {
         const style = document.createElement('style');
@@ -121,7 +133,7 @@
     display: flex;
     gap: 10px;
     padding: 16px 24px 20px;
-    justify-content: flex-end;
+    justify-content: center;
 }
 .fx-btn {
     font-family: 'JetBrains Mono', monospace;
@@ -130,7 +142,6 @@
     padding: 9px 20px;
     border-radius: 8px;
     border: 1px solid transparent;
-    cursor: pointer;
     transition: all 0.18s ease;
     display: inline-flex;
     align-items: center;
@@ -222,7 +233,7 @@
         document.head.appendChild(style);
     }
 
-    // ── Theme config by type ──────────────────────────────────────────────────
+    
     const THEMES = {
         danger: {
             accent:  '#ff3d5a',
@@ -254,7 +265,7 @@
         },
     };
 
-    // ── Build backdrop DOM ────────────────────────────────────────────────────
+    
     function buildBackdrop(theme, { title, message, buttons }) {
         const t = THEMES[theme] || THEMES.info;
 
@@ -292,7 +303,6 @@
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ── Animate out + remove ──────────────────────────────────────────────────
     function dismissBackdrop(backdrop, cb) {
         backdrop.classList.add('fx-hiding');
         setTimeout(() => {
@@ -301,7 +311,6 @@
         }, 200);
     }
 
-    // ── FxAlert ───────────────────────────────────────────────────────────────
     window.FxAlert = function (message, opts = {}) {
         return new Promise((resolve) => {
             const type  = opts.type  || 'info';
@@ -333,7 +342,6 @@
         });
     };
 
-    // ── FxConfirm ────────────────────────────────────────────────────────────
     window.FxConfirm = function (message, opts = {}) {
         return new Promise((resolve) => {
             const type        = opts.type        || 'danger';
@@ -373,8 +381,6 @@
         });
     };
 
-    // ── FxToast (bonus: lightweight non-blocking notification) ────────────────
-    // FxToast(message, type?, duration?)
     window.FxToast = function (message, type = 'info', duration = 3200) {
         const t = THEMES[type] || THEMES.info;
 
@@ -404,7 +410,7 @@
             transform:translateX(24px);
             transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);
             max-width:320px;
-            cursor:pointer;`;
+        `;
         toast.innerHTML = `<i class="fas ${t.icon}" style="flex-shrink:0;font-size:14px"></i><span>${escHtml(message)}</span>`;
         container.appendChild(toast);
 

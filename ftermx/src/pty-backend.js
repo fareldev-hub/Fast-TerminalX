@@ -1,21 +1,19 @@
-/**
- * pty-backend.js
- *
- * Thin abstraction over PTY spawning.
- *
- * Priority:
- *   1. node-pty-prebuilt-multiarch  — real PTY (full terminal support)
- *   2. node-pty                     — real PTY (fallback name)
- *   3. child_process.spawn          — pipe-based fallback (Termux / no native build)
- *
- * All three expose the same interface so callers never need to branch:
- *   const proc = pty.spawn(shell, args, opts)
- *   proc.onData(cb)        — receive output
- *   proc.onExit(cb)        — { exitCode }
- *   proc.write(data)       — send input
- *   proc.resize(cols,rows) — resize (no-op on fallback)
- *   proc.kill()            — terminate
- */
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 
 'use strict';
 
@@ -23,7 +21,6 @@ const {
     spawn: cpSpawn
 } = require('child_process');
 
-// ── Try to load a native PTY library ─────────────────────────────────────────
 let nativePty = null;
 const candidates = ['node-pty-prebuilt-multiarch', 'node-pty'];
 for (const pkg of candidates) {
@@ -31,13 +28,12 @@ for (const pkg of candidates) {
         nativePty = require(pkg);
         break;
     } catch (_) {
-        // try next
+        
     }
 }
 
 const hasPty = !!nativePty;
 
-// ── Native PTY wrapper ────────────────────────────────────────────────────────
 function spawnNative(shell, args, opts) {
     const p = nativePty.spawn(shell, args, {
         name: opts.name || 'xterm-256color',
@@ -56,17 +52,10 @@ function spawnNative(shell, args, opts) {
     };
 }
 
-// ── child_process fallback (pipe-based, no real PTY) ─────────────────────────
-// Works on Termux and any environment without native build tools.
-// Limitations vs real PTY:
-//   - No raw/cbreak mode → readline-based prompts work, full-screen apps (vim,
-//     htop, nano) won't render correctly.
-//   - No terminal size signalling (SIGWINCH).
-//   - ANSI colour still works if the shell emits it unconditionally.
 function spawnFallback(shell, args, opts) {
     const env = {
         ...(opts.env || process.env),
-        // Hint the shell to emit colour even without a real TTY
+        
         TERM: 'xterm-256color',
         COLORTERM: 'truecolor',
         FORCE_COLOR: '1',
@@ -77,7 +66,7 @@ function spawnFallback(shell, args, opts) {
         cwd: opts.cwd || process.cwd(),
         env,
         stdio: ['pipe', 'pipe', 'pipe'],
-        // Keep the shell alive even when stdin closes
+        
         detached: false
     });
 
@@ -105,7 +94,7 @@ function spawnFallback(shell, args, opts) {
         dataCbs.forEach(cb => cb(`\r\n[shell error: ${err.message}]\r\n`));
     });
 
-    // Emit a notice so the user knows they are in fallback mode
+    
     process.nextTick(() => {
         const msg =
             '\r\n\x1b[33m[ftermx] node-pty not available — running in pipe mode.\r\n' +
@@ -124,7 +113,7 @@ function spawnFallback(shell, args, opts) {
             if (!proc.killed) proc.stdin.write(data);
         },
         resize: () => {
-            /* no-op — child_process has no TTY to resize */ },
+             },
         kill: () => {
             try {
                 proc.kill();
@@ -133,12 +122,11 @@ function spawnFallback(shell, args, opts) {
     };
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
 module.exports = {
-    /** true = real PTY, false = pipe fallback */
+    
     hasPty,
 
-    /** Name of the backend actually loaded */
+    
     backendName: hasPty ?
         ((() => {
             try {
@@ -150,10 +138,7 @@ module.exports = {
         })()) :
         'child_process (pipe fallback)',
 
-    /**
-     * spawn(shell, args, opts) → ptyLike
-     *
-     * opts: { name, cols, rows, cwd, env }
-     */
+    
+
     spawn: hasPty ? spawnNative : spawnFallback
 };

@@ -1,3 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 'use strict';
 
 const express = require('express');
@@ -39,8 +56,7 @@ console.log(chalk.white('    Author  : ') + chalk.green('Farel Alfareza'));
 console.log(chalk.white('    Portfolio: ') + chalk.blue('farelsite.pages.dev'));
 console.log(chalk.cyan('    ═══════════════════════════════════════\n'));
 
-// ─── Middleware ──────────────────────────────────────────────────────────────
-app.set('trust proxy', 1); // Replit runs behind a reverse proxy
+app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(compression());
@@ -58,15 +74,9 @@ app.use(sessionMiddleware);
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Path sanitizer for file manager ────────────────────────────────────────
-// IMPORTANT: must live inside the workspace so Replit persists it across restarts.
 const USER_HOMES = path.join(__dirname, '..', 'data', 'users');
 fs.mkdirSync(USER_HOMES, { recursive: true });
 
-// ─── File upload setup ───────────────────────────────────────────────────────
-// Multer's destination callback fires BEFORE express.json() sees the body, so
-// req.body is always empty for multipart requests. We pass the target folder as
-// a URL query-string parameter (?path=…) so it is available without body parsing.
 const upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
@@ -77,7 +87,7 @@ const upload = multer({
         },
         filename: (req, file, cb) => cb(null, file.originalname)
     }),
-    limits: { fileSize: 500 * 1024 * 1024 } // 500 MB
+    limits: { fileSize: 500 * 1024 * 1024 } 
 });
 
 function getUserRoot(user) {
@@ -86,34 +96,24 @@ function getUserRoot(user) {
     return path.join(USER_HOMES, user.username);
 }
 
-/**
- * Resolve a user-supplied path to an absolute path and enforce jail boundaries.
- * Uses path.relative() to detect traversal — safe against sibling-prefix attacks
- * (e.g., root=/home/alice, path=/home/alice2 would pass a naive startsWith check).
- */
 function sanitizeAndResolve(user, reqPath) {
     if (!user) return null;
     const root = path.resolve(getUserRoot(user));
 
-    // Default to root when no path is supplied
     if (!reqPath || reqPath === '/') return root;
 
-    // Resolve relative to root so that both absolute and relative paths work
     const resolved = path.resolve(
         path.isAbsolute(reqPath) ? reqPath : path.join(root, reqPath)
     );
 
-    // For non-admin, enforce home boundary using relative check
     if (user.role !== 'admin') {
         const rel = path.relative(root, resolved);
-        // rel starts with '..' → escaped the root, or is an absolute path on some edge-case OS
         if (rel.startsWith('..') || path.isAbsolute(rel)) return root;
     }
     return resolved;
 
 }
 
-/** Return true if `p` is safely inside `root` (inclusive). */
 function isWithinRoot(root, p) {
     const resolvedRoot = path.resolve(root);
     const resolvedP = path.resolve(p);
@@ -121,7 +121,6 @@ function isWithinRoot(root, p) {
     return !rel.startsWith('..') && !path.isAbsolute(rel);
 }
 
-// ─── Auth routes (public) ────────────────────────────────────────────────────
 app.get('/login', (req, res) => {
     if (req.session?.user) {
         return res.redirect(req.session.user.role === 'admin'
@@ -154,16 +153,13 @@ app.get('/api/me', (req, res) => {
     res.json(req.session.user);
 });
 
-// ─── Public version endpoint ─────────────────────────────────────────────────
 app.get('/api/version', (req, res) => {
     const { version } = require('../package.json');
     res.json({ version });
 });
 
-// ─── Require auth for all remaining routes ───────────────────────────────────
 app.use(requireAuth);
 
-// ─── Main app routes: /ftermx (admin) and /ftermx/:username (user) ───────────
 app.get('/ftermx', requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
@@ -171,11 +167,11 @@ app.get('/ftermx', requireAdmin, (req, res) => {
 app.get('/ftermx/:username', (req, res) => {
     const sessionUser = req.session.user;
     const paramUser = req.params.username;
-    // Admin can access any user page; user can only access their own
+    
     if (sessionUser.role !== 'admin' && sessionUser.username !== paramUser) {
         return res.redirect(`/ftermx/${sessionUser.username}`);
     }
-    // User must exist
+    
     if (!findUser(paramUser)) return res.status(404).send('User not found');
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
@@ -185,7 +181,6 @@ app.get('/', (req, res) => {
     res.redirect(u.role === 'admin' ? '/ftermx' : `/ftermx/${u.username}`);
 });
 
-// ─── Status ───────────────────────────────────────────────────────────────────
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'online',
@@ -197,7 +192,6 @@ app.get('/api/status', (req, res) => {
     });
 });
 
-// ─── User management (admin) ─────────────────────────────────────────────────
 app.get('/api/users', requireAdmin, (req, res) => {
     const users = loadUsers().map(u => ({
         username: u.username,
@@ -230,7 +224,7 @@ app.put('/api/users/:username', requireAdmin, (req, res) => {
     if ('expireAt' in req.body) updates.expireAt = expireAt || null;
     try {
         const updated = updateUser(req.params.username, updates);
-        // Rename home directory if username changed
+        
         if (newUsername && newUsername !== req.params.username) {
             const oldDir = path.join(USER_HOMES, req.params.username);
             const newDir = path.join(USER_HOMES, newUsername);
@@ -256,15 +250,13 @@ app.delete('/api/users/:username', requireAdmin, (req, res) => {
     }
 });
 
-// ─── Auto-purge expired users every minute ────────────────────────────────────
 setInterval(purgeExpiredUsers, 60 * 1000);
 purgeExpiredUsers();
 
-// ─── Tunnel state ─────────────────────────────────────────────────────────────
 let currentTunnelUrl = null;
 let currentTunnelType = null;
 let tunnelStartedAt = null;
-let ngrokListener = null; // ngrok listener
+let ngrokListener = null; 
 
 function stopCurrentTunnel() {
     try { if (ngrokListener) { ngrokListener.close(); ngrokListener = null; } } catch (_) {}
@@ -273,7 +265,6 @@ function stopCurrentTunnel() {
     tunnelStartedAt = null;
 }
 
-// ─── Ngrok tunnel (start from web with auth token) ────────────────────────────
 app.post('/api/tunnel/ngrok/start', requireAdmin, async (req, res) => {
     const { authtoken } = req.body;
     if (!authtoken) return res.status(400).json({ error: 'authtoken required' });
@@ -303,7 +294,6 @@ app.post('/api/tunnel/ngrok/stop', requireAdmin, async (req, res) => {
     res.json({ ok: true });
 });
 
-// ─── Tunnel stats ─────────────────────────────────────────────────────────────
 app.get('/api/tunnel/stats', requireAdmin, (req, res) => {
     res.json({
         url: currentTunnelUrl,
@@ -314,14 +304,12 @@ app.get('/api/tunnel/stats', requireAdmin, (req, res) => {
     });
 });
 
-// ─── File Manager API ─────────────────────────────────────────────────────────
 function fmCheckAccess(req, res) {
     const user = req.session?.user;
     if (!user) { res.status(401).json({ error: 'Not authenticated' }); return null; }
     return user;
 }
 
-// List directory
 app.get('/api/fm/list', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -350,7 +338,6 @@ app.get('/api/fm/list', (req, res) => {
     }
 });
 
-// Create directory
 app.post('/api/fm/mkdir', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -362,7 +349,6 @@ app.post('/api/fm/mkdir', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Create file
 app.post('/api/fm/touch', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -375,7 +361,6 @@ app.post('/api/fm/touch', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Delete file or directory
 app.delete('/api/fm/delete', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -387,7 +372,7 @@ app.delete('/api/fm/delete', (req, res) => {
     for (const rp of paths) {
         const p = sanitizeAndResolve(user, rp);
         if (!p) { errors.push(`invalid: ${rp}`); continue; }
-        // Prevent deleting user root
+        
         if (p === getUserRoot(user)) { errors.push('Cannot delete root'); continue; }
         try {
             fs.rmSync(p, { recursive: true, force: true });
@@ -397,7 +382,6 @@ app.delete('/api/fm/delete', (req, res) => {
     res.json({ ok: true });
 });
 
-// Rename / move
 app.post('/api/fm/rename', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -410,11 +394,10 @@ app.post('/api/fm/rename', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Upload files — target folder passed as ?path= query param (body not available in multer cb)
 app.post('/api/fm/upload', (req, res) => {
     const user = req.session?.user;
     if (!user) return res.status(401).json({ error: 'Not authenticated' });
-    // Validate destination path before handing off to multer
+    
     const destPath = sanitizeAndResolve(user, req.query.path || '/');
     if (!destPath) return res.status(400).json({ error: 'Invalid upload path' });
     upload.array('files')(req, res, (err) => {
@@ -423,7 +406,6 @@ app.post('/api/fm/upload', (req, res) => {
     });
 });
 
-// Download file
 app.get('/api/fm/download', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -434,7 +416,6 @@ app.get('/api/fm/download', (req, res) => {
     res.download(p);
 });
 
-// Extract zip/tar
 app.post('/api/fm/unzip', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -449,10 +430,10 @@ app.post('/api/fm/unzip', (req, res) => {
             zip.extractAllTo(dest, true);
         } else if (['.tar', '.gz', '.tgz', '.bz2', '.xz'].includes(ext) ||
                     src.endsWith('.tar.gz') || src.endsWith('.tar.bz2')) {
-            // Use execFile with an argument array — no shell interpolation, no injection risk
+            
             const { execFileSync } = require('child_process');
             fs.mkdirSync(dest, { recursive: true });
-            // Verify dest is still inside the user's root (second boundary check after extraction)
+            
             execFileSync('tar', ['-xf', src, '-C', dest], { timeout: 60000 });
         } else {
             return res.status(400).json({ error: 'Unsupported archive format (use .zip or .tar*)' });
@@ -461,7 +442,6 @@ app.post('/api/fm/unzip', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Create zip of selected paths
 app.post('/api/fm/zip', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -484,7 +464,6 @@ app.post('/api/fm/zip', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Read file content (for text editor/viewer)
 app.get('/api/fm/read', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
@@ -499,13 +478,12 @@ app.get('/api/fm/read', (req, res) => {
     } catch { res.json({ ok: true, content: '[binary file — not previewable]' }); }
 });
 
-// Write / save file content
 app.put('/api/fm/write', (req, res) => {
     const user = fmCheckAccess(req, res);
     if (!user) return;
     const p = sanitizeAndResolve(user, req.body.path);
     if (!p) return res.status(400).json({ error: 'Invalid path' });
-    // Reject writing to a directory
+    
     if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
         return res.status(400).json({ error: 'Cannot write to a directory' });
     }
@@ -516,13 +494,11 @@ app.put('/api/fm/write', (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// ─── Error handler ────────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
     console.error(chalk.red(err.stack));
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// ─── Session store: sessionId → { ptyProcess, socketId, scrollback, type } ───
 const sessions = new Map();
 let sessionCounter = 0;
 const SCROLLBACK_LIMIT = 102400;
@@ -539,12 +515,10 @@ function routePtyData(sessionId, data) {
     }
 }
 
-// ─── Share session middleware with Socket.IO ──────────────────────────────────
 io.use((socket, next) => {
     sessionMiddleware(socket.request, socket.request.res || {}, next);
 });
 
-// ─── Socket.IO ────────────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
     const user = socket.request.session?.user;
     if (!user) {
@@ -559,7 +533,7 @@ io.on('connection', (socket) => {
     socket.on('list-sessions', () => {
         const list = [];
         for (const [sid, sess] of sessions) {
-            // Only expose this user's sessions (or all for admin)
+            
             if (user.role === 'admin' || sess.owner === user.username) {
                 list.push({ sessionId: sid, type: sess.type || 'local' });
             }
@@ -573,7 +547,7 @@ io.on('connection', (socket) => {
             socket.emit('shell-error', { sessionId, error: 'Session no longer exists' });
             return;
         }
-        // Ownership check
+        
         if (user.role !== 'admin' && sess.owner !== user.username) {
             socket.emit('shell-error', { sessionId, error: 'Access denied' });
             return;
@@ -583,14 +557,14 @@ io.on('connection', (socket) => {
         if (sess.scrollback) socket.emit('shell-data', { sessionId, data: sess.scrollback });
     });
 
-    // ── Spawn local PTY shell ──────────────────────────────────────────────
+    
     socket.on('spawn-shell', (opts = {}) => {
         const sessionId = ++sessionCounter;
         const cols = opts.cols || 80;
         const rows = opts.rows || 24;
         const shell = process.env.SHELL || '/bin/bash';
 
-        // Determine CWD and env based on user role
+        
         let cwd, shellEnv;
         if (user.role === 'admin') {
             cwd = process.env.HOME || process.cwd();
@@ -636,7 +610,7 @@ io.on('connection', (socket) => {
         });
     });
 
-    // ── Spawn SSH ──────────────────────────────────────────────────────────
+    
     socket.on('spawn-ssh', (opts = {}) => {
         const sessionId = ++sessionCounter;
         const { host, port = 22, username, password, cols = 80, rows = 24 } = opts;
@@ -702,27 +676,27 @@ io.on('connection', (socket) => {
     socket.on('shell-input', ({ sessionId, data }) => {
         const sess = sessions.get(sessionId);
         if (!sess) return;
-        if (user.role !== 'admin' && sess.owner !== user.username) return; // ownership check
+        if (user.role !== 'admin' && sess.owner !== user.username) return; 
         sess.ptyProcess.write(data);
     });
 
     socket.on('shell-resize', ({ sessionId, cols, rows }) => {
         const sess = sessions.get(sessionId);
         if (!sess) return;
-        if (user.role !== 'admin' && sess.owner !== user.username) return; // ownership check
+        if (user.role !== 'admin' && sess.owner !== user.username) return; 
         sess.ptyProcess.resize(cols, rows);
     });
 
     socket.on('shell-close', ({ sessionId }) => {
         const sess = sessions.get(sessionId);
         if (!sess) return;
-        if (user.role !== 'admin' && sess.owner !== user.username) return; // ownership check
+        if (user.role !== 'admin' && sess.owner !== user.username) return; 
         sess.ptyProcess.kill();
         sessions.delete(sessionId);
     });
 
-    // ── Package installer (admin only) ───────────────────────────────────────
-    let pkgProc = null; // one process per socket connection
+    
+    let pkgProc = null; 
 
     socket.on('pkg-install', ({ packages }) => {
         const input = (packages || '').trim();
@@ -754,16 +728,16 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Detect common interactive prompts in output and notify the client
+        
         const PROMPT_RE = /(\[([Yy])\/([Nn])\]|\[([Nn])\/([Yy])\]|\(([Yy])\/([Nn])\)|\(([Nn])\/([Yy])\)|yes\/no|Do you want to continue|Proceed\?|press enter to continue)/i;
         function detectPrompt(text) {
             const match = text.match(PROMPT_RE);
             if (!match) return;
-            // Determine default answer from bracket hint
+            
             const lower = match[0].toLowerCase();
             let defaultAnswer = '';
-            if (/\[y\/n\]|\[y\//i.test(match[0])) defaultAnswer = 'y';
-            else if (/\[n\/y\]|\[n\//i.test(match[0])) defaultAnswer = 'n';
+            if (lower.includes('[y/n]') || lower.includes('(y/n)') || lower.includes('yes/no')) defaultAnswer = 'y';
+            else if (lower.includes('[n/y]') || lower.includes('(n/y)')) defaultAnswer = 'n';
             else if (/press enter|proceed/i.test(match[0])) defaultAnswer = '';
             socket.emit('pkg-prompt', { line: text.trim(), defaultAnswer });
         }
@@ -813,7 +787,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// ─── Start server ─────────────────────────────────────────────────────────────
 function sep(ch = '─') {
     const w = Math.min(process.stdout.columns || 50, 60);
     return chalk.hex('#3d5068')(ch.repeat(w));
@@ -821,7 +794,6 @@ function sep(ch = '─') {
 
 const PORT = process.env.PORT || 5000;
 
-// Ensure user homes base dir exists
 fs.mkdirSync(USER_HOMES, { recursive: true });
 
 async function startServer() {

@@ -1,3 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                         ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -20,27 +37,22 @@ const io = socketIo(server, {
     }
 });
 
-// Security middleware
 app.use(helmet({
     contentSecurityPolicy: false
 }));
 app.use(cors());
 app.use(compression());
 
-// Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100
 });
 app.use('/api/', limiter);
 
-// Static files
 app.use(express.static(path.join(__dirname, 'src/public')));
 
-// SSH connections pool
 const connections = new Map();
 
-// Socket.io connection handling
 io.on('connection', (socket) => {
     console.log(chalk.green('✓ Client connected'));
 
@@ -104,7 +116,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Routes
 app.get('/ftermx', (req, res) => res.sendFile(path.join(__dirname, 'src/public/index.html')));
 app.get('/', (req, res) => res.redirect('/ftermx'));
 
@@ -116,7 +127,6 @@ app.get('/api/status', (req, res) => {
     });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
     console.error(chalk.red(err.stack));
     res.status(500).json({
@@ -124,13 +134,12 @@ app.use((err, req, res, next) => {
     });
 });
 
-// ─── Responsive separator — adapts to the actual terminal column width ─────────
 function sep(ch = '─') {
     const w = Math.min(process.stdout.columns || 50, 60);
     return chalk.gray(ch.repeat(w));
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1010;
 
 async function startServer() {
     try {

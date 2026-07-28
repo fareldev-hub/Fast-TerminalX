@@ -1,4 +1,19 @@
-// ─── Admin panel JS ───────────────────────────────────────────────────────────
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 
 function fmtUptime(secs) {
     if (!secs) return '0s';
@@ -10,7 +25,6 @@ function fmtUptime(secs) {
     return `${s}s`;
 }
 
-// Convert duration shorthand (e.g. "7d") to an ISO expireAt timestamp string
 function durationToExpireAt(val) {
     if (!val) return null;
     const num = parseInt(val);
@@ -21,7 +35,6 @@ function durationToExpireAt(val) {
     return ms ? new Date(Date.now() + ms).toISOString() : null;
 }
 
-// Format expireAt timestamp into a readable label + CSS class
 function fmtExpiry(expireAt) {
     if (!expireAt) return { label: '—', cls: 'expiry-never' };
     const diff = new Date(expireAt).getTime() - Date.now();
@@ -32,32 +45,37 @@ function fmtExpiry(expireAt) {
     return { label, cls: d < 1 ? 'expiry-soon' : 'expiry-ok' };
 }
 
-// ─── Tunnel stats ─────────────────────────────────────────────────────────────
 window.loadTunnelStats = async function () {
     try {
         const res = await fetch('/api/tunnel/stats');
         if (!res.ok) return;
         const data = await res.json();
 
-        document.getElementById('statStatus').textContent = data.active ? '🟢 Online' : '⚫ Offline';
+        const statusEl = document.getElementById('statStatus');
+        statusEl.innerHTML = data.active
+            ? '<span class="stat-dot stat-dot-online"></span>Online'
+            : '<span class="stat-dot stat-dot-offline"></span>Offline';
+
         document.getElementById('statType').textContent = data.type || '—';
         document.getElementById('statUptime').textContent = fmtUptime(data.uptime);
         document.getElementById('statSessions').textContent = data.sessions ?? '—';
 
         const urlRow = document.getElementById('statUrlRow');
-        const statUrl = document.getElementById('statUrl');
-        if (data.url) {
+        const statUrlLink = document.getElementById('statUrl');
+        const activeUrl = data.url || (data.active ? window.location.origin : null);
+
+        if (activeUrl) {
             urlRow.style.display = 'flex';
-            statUrl.textContent = data.url;
+            statUrlLink.textContent = activeUrl;
+            statUrlLink.href = activeUrl;
             document.getElementById('copyStatUrl').onclick = () =>
-                navigator.clipboard.writeText(data.url).catch(() => {});
+                navigator.clipboard.writeText(activeUrl).catch(() => {});
         } else {
             urlRow.style.display = 'none';
         }
     } catch (_) {}
 };
 
-// ─── User table ───────────────────────────────────────────────────────────────
 async function loadUserTable() {
     const container = document.getElementById('userTable');
     if (!container) return;
@@ -70,35 +88,37 @@ async function loadUserTable() {
         if (!users.length) { container.innerHTML = '<div class="user-table-loading">No users found</div>'; return; }
 
         container.innerHTML = `
-          <div class="user-table-head">
-            <span>Username</span>
-            <span>Role</span>
-            <span>Expiry</span>
-            <span></span>
-          </div>
-          ${users.map(u => {
-              const { label, cls } = fmtExpiry(u.expireAt);
-              return `
-            <div class="user-row" data-username="${u.username}">
-              <span class="user-row-name"><i class="fas fa-user"></i> ${u.username}</span>
-              <span class="user-row-role role-${u.role}">${u.role}</span>
-              <span class="user-row-expiry">
-                <span class="expiry-badge ${cls}">
-                  ${cls !== 'expiry-never' ? '<i class="fas fa-clock"></i>' : ''}
-                  ${label}
+          <div class="user-table-inner">
+            <div class="user-table-head">
+              <span>Username</span>
+              <span>Role</span>
+              <span>Expiry</span>
+              <span></span>
+            </div>
+            ${users.map(u => {
+                const { label, cls } = fmtExpiry(u.expireAt);
+                return `
+              <div class="user-row" data-username="${u.username}">
+                <span class="user-row-name"><i class="fas fa-user"></i> ${u.username}</span>
+                <span class="user-row-role role-${u.role}">${u.role}</span>
+                <span class="user-row-expiry">
+                  <span class="expiry-badge ${cls}">
+                    ${cls !== 'expiry-never' ? '<i class="fas fa-clock"></i>' : ''}
+                    ${label}
+                  </span>
                 </span>
-              </span>
-              <span class="user-row-actions">
-                <button class="btn btn-small btn-edit user-edit-btn" data-username="${u.username}"
-                        data-expireat="${u.expireAt || ''}" title="Edit user">
-                  <i class="fas fa-pen"></i>
-                </button>
-                <button class="btn btn-small btn-danger user-delete-btn" data-username="${u.username}" title="Delete user">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </span>
-            </div>`;
-          }).join('')}
+                <span class="user-row-actions">
+                  <button class="btn btn-small btn-edit user-edit-btn" data-username="${u.username}"
+                          data-expireat="${u.expireAt || ''}" title="Edit user">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                  <button class="btn btn-small btn-danger user-delete-btn" data-username="${u.username}" title="Delete user">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </span>
+              </div>`;
+            }).join('')}
+          </div>
         `;
 
         container.querySelectorAll('.user-edit-btn').forEach(btn => {
@@ -127,7 +147,6 @@ async function loadUserTable() {
     }
 }
 
-// ─── Edit user modal ──────────────────────────────────────────────────────────
 let _editTarget = null;
 
 function openEditUser(username, expireAt) {
@@ -146,12 +165,11 @@ function closeEditUser() {
     _editTarget = null;
 }
 
-// ─── Boot (admin only) ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refreshTunnelStats');
     if (refreshBtn) refreshBtn.addEventListener('click', window.loadTunnelStats);
 
-    // ── Add user dialog ──────────────────────────────────────────────────────
+    
     const addUserOverlay = document.getElementById('addUserModalOverlay');
     const openAddUser = () => {
         addUserOverlay.classList.remove('hidden');
@@ -195,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch { errEl.textContent = 'Network error'; errEl.classList.remove('hidden'); }
     });
 
-    // ── Edit user dialog ─────────────────────────────────────────────────────
+    
     const editOverlay = document.getElementById('editUserModalOverlay');
     document.getElementById('closeEditUserModal')?.addEventListener('click', closeEditUser);
     document.getElementById('cancelEditUserBtn')?.addEventListener('click', closeEditUser);
@@ -218,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = {};
         if (newUsername) body.username = newUsername;
         if (newPassword) body.password = newPassword;
-        // Always send expireAt so admin can set it to "Never"
+        
         body.expireAt = durationToExpireAt(expiryVal);
 
         try {
@@ -233,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch { errEl.textContent = 'Network error'; errEl.classList.remove('hidden'); }
     });
 
-    // ── Load user table when admin page is navigated to ──────────────────────
+    
     const adminPage = document.getElementById('pagAdmin');
     if (adminPage) {
         const observer = new MutationObserver(() => {

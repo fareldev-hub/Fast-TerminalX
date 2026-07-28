@@ -1,6 +1,6 @@
 {
     "name": "f-termx",
-    "version": "1.3.18",
+    "version": "1.3.20",
     "description": "Modern terminal tunnel platform with multiple SSH sessions",
     "main": "index.js",
     "bin": {

@@ -1,4 +1,20 @@
-// ─── Auth guard ───────────────────────────────────────────────────────────────
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 let currentUser = null;
 
 async function loadCurrentUser() {
@@ -12,7 +28,6 @@ async function loadCurrentUser() {
     }
 }
 
-// ─── Socket.IO ───────────────────────────────────────────────────────────────
 const socket = io({
     transports: ['websocket', 'polling'],
     reconnection: true,
@@ -21,12 +36,10 @@ const socket = io({
     reconnectionDelayMax: 5000
 });
 
-// ─── State ────────────────────────────────────────────────────────────────────
 const terminals = {};
 let dragData = null;
 const isMobile = () => window.innerWidth <= 768;
 
-// ─── Socket events ────────────────────────────────────────────────────────────
 socket.on('auth-required', () => { window.location.href = '/login'; });
 socket.on('connect', () => { setConnectionStatus('connected'); socket.emit('list-sessions'); });
 socket.on('disconnect', () => setConnectionStatus('disconnected'));
@@ -36,7 +49,7 @@ socket.on('session-list', (list) => {
     const closed = JSON.parse(sessionStorage.getItem('ftermx_closed') || '[]');
     list.forEach(({ sessionId, type }) => {
         if (closed.includes(String(sessionId))) {
-            // User explicitly closed this session — kill it server-side
+            
             socket.emit('shell-close', { sessionId });
             return;
         }
@@ -87,7 +100,6 @@ socket.on('shell-error', ({ sessionId, error }) => {
     updateTerminalStatus(sessionId, 'error');
 });
 
-// ─── Card label ───────────────────────────────────────────────────────────────
 function updateCardLabel(sessionId, type) {
     const t = terminals[sessionId];
     if (!t) return;
@@ -97,7 +109,6 @@ function updateCardLabel(sessionId, type) {
     if (center) center.innerHTML = `<i class="fas ${icon}"></i> ${label} · #${sessionId}`;
 }
 
-// ─── Reattach ─────────────────────────────────────────────────────────────────
 function reattachTerminal(sessionId, type = 'local') {
     if (terminals[sessionId]) return;
     const card = buildTerminalCard(sessionId);
@@ -124,7 +135,6 @@ function reattachTerminal(sessionId, type = 'local') {
     socket.emit('reattach-shell', { sessionId });
 }
 
-// ─── Spawn terminal ───────────────────────────────────────────────────────────
 function spawnTerminal() {
     const tempId = 'tmp-' + Date.now();
     const card = buildTerminalCard(tempId);
@@ -170,7 +180,6 @@ function spawnTerminal() {
     setupCardControls(tempId, card, term, fitAddon);
 }
 
-// ─── Spawn SSH ────────────────────────────────────────────────────────────────
 function spawnSSH(opts) {
     const tempId = 'tmp-' + Date.now();
     const card = buildTerminalCard(tempId);
@@ -227,8 +236,13 @@ function spawnSSH(opts) {
     setupCardControls(tempId, card, term, fitAddon);
 }
 
-// ─── Terminal factory ─────────────────────────────────────────────────────────
 function makeTerminal() {
+    const vw = window.innerWidth;
+    // Smaller font on mobile so more columns fit (neofetch needs ~70+ cols)
+    const fontSize    = vw <= 480 ? 10 : vw <= 768 ? 11 : 13;
+    const lineHeight  = vw <= 480 ? 1.15 : 1.25;
+    const letterSpace = vw <= 480 ? 0 : 0.3;
+
     return new Terminal({
         cursorBlink: true,
         cursorStyle: 'block',
@@ -242,15 +256,14 @@ function makeTerminal() {
             brightCyan: '#22e9e9', brightWhite: '#e2eaf5'
         },
         fontFamily: '"JetBrains Mono","Cascadia Code","Fira Code",monospace',
-        fontSize: 13,
-        lineHeight: 1.25,
-        letterSpacing: 0.3,
+        fontSize,
+        lineHeight,
+        letterSpacing: letterSpace,
         allowTransparency: true,
         scrollback: 5000
     });
 }
 
-// ─── Build card DOM ───────────────────────────────────────────────────────────
 function buildTerminalCard(id) {
     const grid = document.getElementById('terminalGrid');
     const es = grid.querySelector('.empty-state');
@@ -311,13 +324,41 @@ function showEmptyState() {
     grid.classList.add('is-empty');
 }
 
-// ─── Input, resize, keyboard ──────────────────────────────────────────────────
 function setupTerminalEvents(sessionId) {
     const { term, fitAddon, card } = terminals[sessionId];
 
+    
+    terminals[sessionId]._lineBuf = '';
+
     term.onData((data) => {
-        if (terminals[sessionId]?.ptyReady)
-            socket.emit('shell-input', { sessionId, data });
+        if (!terminals[sessionId]?.ptyReady) return;
+
+        
+        if (currentUser?.role !== 'admin') {
+            for (const char of data) {
+                const code = char.charCodeAt(0);
+                if (code === 13 || code === 10) {          
+                    const cmd = (terminals[sessionId]._lineBuf || '').trim().split(/\s+/)[0];
+                    terminals[sessionId]._lineBuf = '';
+                    if (cmd === 'ftermx') {
+                        
+                        socket.emit('shell-input', { sessionId, data: '\x03' }); 
+                        term.write('\r\n\x1b[31m✖ Perintah "ftermx" diblokir untuk role user.\x1b[0m\r\n');
+                        return;
+                    }
+                } else if (code === 127 || code === 8) {   
+                    const buf = terminals[sessionId]._lineBuf || '';
+                    terminals[sessionId]._lineBuf = buf.slice(0, -1);
+                } else if (code >= 32) {                   
+                    terminals[sessionId]._lineBuf = (terminals[sessionId]._lineBuf || '') + char;
+                } else if (code === 21) {                  
+                    terminals[sessionId]._lineBuf = '';
+                }
+            }
+        }
+        
+
+        socket.emit('shell-input', { sessionId, data });
     });
 
     const ro = new ResizeObserver(() => {
@@ -349,7 +390,6 @@ function setupTerminalEvents(sessionId) {
     });
 }
 
-// ─── Card toolbar + drag ──────────────────────────────────────────────────────
 function setupCardControls(id, card, term, fitAddon) {
     card.querySelector('[data-action="clear"]').addEventListener('click', () => term.clear());
     card.querySelector('[data-action="close"]').addEventListener('click', () =>
@@ -357,7 +397,7 @@ function setupCardControls(id, card, term, fitAddon) {
     );
     card.querySelector('[data-action="files"]').addEventListener('click', () => {
         navigateTo('files');
-        // Optionally trigger file manager refresh
+        
         if (window.fmRefresh) window.fmRefresh();
     });
     card.addEventListener('click', () => term.focus());
@@ -391,11 +431,10 @@ function setupCardControls(id, card, term, fitAddon) {
     }
 }
 
-// ─── Close terminal ───────────────────────────────────────────────────────────
 function closeTerminal(sessionId) {
     const t = terminals[sessionId];
     if (!t) return;
-    // Remember this was explicitly closed so it won't reattach on page refresh
+    
     const closed = JSON.parse(sessionStorage.getItem('ftermx_closed') || '[]');
     const sid = String(sessionId);
     if (!closed.includes(sid)) closed.push(sid);
@@ -416,7 +455,6 @@ function killAll() {
     setTimeout(() => socket.connect(), 300);
 }
 
-// ─── Sidebar sessions ─────────────────────────────────────────────────────────
 function addSidebarSession(sessionId, type = 'local') {
     const list = document.getElementById('sessionList');
     const np = list.querySelector('.no-sessions');
@@ -463,7 +501,6 @@ function updateSidebarSession(sessionId, status) {
     }
 }
 
-// ─── Terminal status ──────────────────────────────────────────────────────────
 function updateTerminalStatus(sessionId, status) {
     const el = document.getElementById(`status-${sessionId}`);
     if (!el) return;
@@ -495,7 +532,6 @@ function setConnectionStatus(state) {
     dot.style.boxShadow = info.glow;
 }
 
-// ─── Page navigation ──────────────────────────────────────────────────────────
 const pageMap = {
     terminal: { page: 'pagTerminal', title: 'Terminal',  newBtn: true,  adminOnly: false },
     files:    { page: 'pagFiles',    title: 'Files',     newBtn: false, adminOnly: false },
@@ -522,7 +558,6 @@ function navigateTo(key) {
     if (isMobile()) closeSidebar();
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
 function openSidebar() {
     document.getElementById('sidebar').classList.add('open');
     document.getElementById('sidebarBackdrop').classList.add('visible');
@@ -540,7 +575,6 @@ function toggleSidebar() {
     }
 }
 
-// ─── Tunnel helpers ───────────────────────────────────────────────────────────
 function showTunnelStatus(url, type) {
     const card = document.getElementById('tunnelStatusCard');
     const urlEl = document.getElementById('tunnelStatusUrl');
@@ -568,7 +602,6 @@ async function stopActiveTunnel() {
     } catch (_) {}
 }
 
-// ─── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     currentUser = await loadCurrentUser();
     if (!currentUser) return;
@@ -618,7 +651,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // ── SSH dialog ──────────────────────────────────────────────────────────
+    
     const sshOverlay = document.getElementById('sshModalOverlay');
     const openSsh = () => { sshOverlay.classList.remove('hidden'); document.getElementById('sshHost').focus(); };
     const closeSsh = () => { sshOverlay.classList.add('hidden'); document.getElementById('sshError').classList.add('hidden'); };
@@ -643,7 +676,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         spawnSSH({ host, port: Number(port), username: user, password: pass });
     });
 
-    // ── Ngrok dialog ────────────────────────────────────────────────────────
+    
     const ngrokOverlay = document.getElementById('ngrokModalOverlay');
     const openNgrok = () => { ngrokOverlay.classList.remove('hidden'); document.getElementById('ngrokToken').focus(); };
     const closeNgrok = () => {
@@ -691,16 +724,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.innerHTML = '<i class="fas fa-play"></i> Start Tunnel';
     });
 
-    // ── Stop tunnel ─────────────────────────────────────────────────────────
+    
     document.getElementById('stopTunnelBtn')?.addEventListener('click', stopActiveTunnel);
 
-    // ── Copy tunnel URL ─────────────────────────────────────────────────────
+    
     document.getElementById('copyTunnelUrl')?.addEventListener('click', () => {
         const url = document.getElementById('tunnelStatusUrl')?.textContent;
         if (url) navigator.clipboard.writeText(url).catch(() => {});
     });
 
-    // Load tunnel status for connect page
+    
     loadTunnelStatus();
 });
 
@@ -712,15 +745,13 @@ async function loadTunnelStatus() {
     } catch (_) {}
 }
 
-// Make available globally
 window.spawnSSH = spawnSSH;
 window.navigateTo = navigateTo;
 
-// ─── Package Installer ────────────────────────────────────────────────────────
 (function () {
     'use strict';
 
-    // ── Simple ANSI-to-HTML converter ─────────────────────────────────────────
+    
     const ANSI_COLORS = {
         30:'#3d5068', 31:'#ff3d5a', 32:'#00ff88', 33:'#ffd166',
         34:'#3b82f6', 35:'#a855f7', 36:'#06d6d6', 37:'#e2eaf5',
@@ -729,7 +760,7 @@ window.navigateTo = navigateTo;
     };
 
     function ansiToHtml(raw) {
-        // Escape HTML first
+        
         let s = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         let depth = 0;
         s = s.replace(/\x1b\[([0-9;]*)m/g, (_, codes) => {
@@ -746,19 +777,19 @@ window.navigateTo = navigateTo;
             return out;
         });
         if (depth > 0) s += '</span>'.repeat(depth);
-        // Handle carriage-return overwrite (progress lines)
+        
         s = s.replace(/[^\n]*\r(?!\n)/g, '');
         return s;
     }
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    
     let pkgRunning = false;
 
-    // ── DOM helpers ───────────────────────────────────────────────────────────
+    
     function pkgAppend(html) {
         const out = document.getElementById('pkgOutput');
         if (!out) return;
-        // Remove placeholder on first real output
+        
         const ph = out.querySelector('.pkg-placeholder');
         if (ph) ph.remove();
         const span = document.createElement('span');
@@ -768,7 +799,7 @@ window.navigateTo = navigateTo;
     }
 
     function pkgSetStatus(state) {
-        // state: '' | 'running' | 'done' | 'error' | 'cancelled'
+        
         const badge  = document.getElementById('pkgStatusBadge');
         const cancel = document.getElementById('pkgCancelBtn');
         const btn    = document.getElementById('pkgInstallBtn');
@@ -796,7 +827,7 @@ window.navigateTo = navigateTo;
         pkgRunning = state === 'running';
     }
 
-    // ── Stdin bar helpers ─────────────────────────────────────────────────────
+    
     function pkgShowStdin(defaultAnswer) {
         const row   = document.getElementById('pkgStdinRow');
         const input = document.getElementById('pkgStdinInput');
@@ -809,10 +840,10 @@ window.navigateTo = navigateTo;
             input.focus();
             input.select();
         }
-        // Highlight the default button
+        
         if (btnY) btnY.classList.toggle('default', defaultAnswer === 'y' || defaultAnswer === 'Y');
         if (btnN) btnN.classList.toggle('default', defaultAnswer === 'n' || defaultAnswer === 'N');
-        // Scroll terminal to bottom so the bar is visible
+        
         const out = document.getElementById('pkgOutput');
         if (out) out.scrollTop = out.scrollHeight;
     }
@@ -828,13 +859,13 @@ window.navigateTo = navigateTo;
 
     function pkgSendStdin(text) {
         if (!pkgRunning) return;
-        // Echo what the user typed into the output
+        
         pkgAppend(ansiToHtml(`\x1b[36m${text || '(enter)'}\x1b[0m\n`));
         socket.emit('pkg-stdin', { text: text ?? '' });
         pkgHideStdin();
     }
 
-    // ── Socket events ─────────────────────────────────────────────────────────
+    
     socket.on('pkg-output', ({ text, done, code }) => {
         pkgAppend(ansiToHtml(text));
         if (done) {
@@ -847,7 +878,7 @@ window.navigateTo = navigateTo;
         pkgShowStdin(defaultAnswer);
     });
 
-    // ── Boot ──────────────────────────────────────────────────────────────────
+    
     document.addEventListener('DOMContentLoaded', () => {
         const input     = document.getElementById('pkgInput');
         const installBtn = document.getElementById('pkgInstallBtn');
@@ -855,16 +886,16 @@ window.navigateTo = navigateTo;
         const clearBtn  = document.getElementById('pkgClearBtn');
         const output    = document.getElementById('pkgOutput');
 
-        if (!input) return; // page not present (non-admin build)
+        if (!input) return; 
 
-        // Install
+        
         function doInstall() {
             const packages = input.value.trim();
             if (!packages || pkgRunning) return;
             pkgSetStatus('running');
             const title = document.getElementById('pkgTermTitle');
             if (title) title.innerHTML = `<i class="fas fa-spinner fa-spin"></i> installing <strong>${packages}</strong>`;
-            // Clear previous output
+            
             if (output) output.innerHTML = '';
             socket.emit('pkg-install', { packages });
         }
@@ -872,19 +903,19 @@ window.navigateTo = navigateTo;
         installBtn?.addEventListener('click', doInstall);
         input?.addEventListener('keydown', e => { if (e.key === 'Enter') doInstall(); });
 
-        // Cancel
+        
         cancelBtn?.addEventListener('click', () => {
             if (!pkgRunning) return;
             socket.emit('pkg-cancel');
         });
 
-        // Clear
+        
         clearBtn?.addEventListener('click', () => {
             if (output) output.innerHTML = '<span class="pkg-placeholder">Ready — enter package name(s) above and click Install.</span>';
             pkgSetStatus('');
         });
 
-        // Stdin bar wiring
+        
         document.getElementById('pkgStdinInput')?.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -895,23 +926,23 @@ window.navigateTo = navigateTo;
         document.getElementById('pkgStdinN')?.addEventListener('click', () => pkgSendStdin('n'));
         document.getElementById('pkgStdinEnter')?.addEventListener('click', () => pkgSendStdin(''));
 
-        // Quick-chip clicks
+        
         document.querySelectorAll('.pkg-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 const cur = input.value.trim();
                 const pkg = chip.dataset.pkg;
-                // Toggle: add if not present, remove if already there
+                
                 const parts = cur ? cur.split(/\s+/) : [];
                 const idx = parts.indexOf(pkg);
                 if (idx === -1) parts.push(pkg); else parts.splice(idx, 1);
                 input.value = parts.join(' ');
                 input.focus();
-                // Update chip active state
+                
                 chip.classList.toggle('active', parts.includes(pkg));
             });
         });
 
-        // Sync chip active state when input changes manually
+        
         input?.addEventListener('input', () => {
             const parts = input.value.trim().split(/\s+/);
             document.querySelectorAll('.pkg-chip').forEach(chip => {

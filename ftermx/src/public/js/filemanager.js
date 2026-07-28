@@ -1,4 +1,20 @@
-// ─── File Manager ─────────────────────────────────────────────────────────────
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   ███████╗ █████╗ ██████╗ ███████╗██╗     ██████╗ ███████╗██╗   ██╗    ║
+// ║   ██╔════╝██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██╔════╝██║   ██║    ║
+// ║   █████╗  ███████║██████╔╝█████╗  ██║     ██║  ██║█████╗  ██║   ██║    ║
+// ║   ██╔══╝  ██╔══██║██╔══██╗██╔══╝  ██║     ██║  ██║██╔══╝  ╚██╗ ██╔╝    ║
+// ║   ██║     ██║  ██║██║  ██║███████╗███████╗██████╔╝███████╗  ╚████╔╝     ║
+// ║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚══════╝   ╚═══╝      ║
+// ║                                                                          ║
+// ║                      ✦  Source By FarelDev  ✦                           ║
+// ║                  ──────────────────────────────────                      ║
+// ║               Copyright © 2026 FarelDev. All Rights Reserved.           ║
+// ║              Licensed under the Apache License, Version 2.0             ║
+// ║                   See LICENSE file for full details.                     ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
 (function () {
     'use strict';
 
@@ -8,7 +24,7 @@
     let fmSelected = new Set();
     let fmEntries = [];
 
-    // ─── Extension → highlight.js language alias ─────────────────────────────
+    
     const EXT_LANG = {
         '.js':'javascript',  '.mjs':'javascript',  '.cjs':'javascript',
         '.ts':'typescript',  '.tsx':'typescript',
@@ -38,14 +54,44 @@
         '.log':'plaintext', '.txt':'plaintext', '.csv':'plaintext',
     };
 
+    
+    const ACE_LANG = {
+        '.js':'javascript',  '.mjs':'javascript',  '.cjs':'javascript',
+        '.ts':'typescript',  '.tsx':'typescript',
+        '.py':'python',      '.pyw':'python',
+        '.html':'html',      '.htm':'html',
+        '.css':'css',        '.scss':'scss',  '.sass':'scss', '.less':'less',
+        '.json':'json',      '.jsonc':'json',
+        '.xml':'xml',        '.svg':'xml',
+        '.yml':'yaml',       '.yaml':'yaml',
+        '.toml':'toml',      '.ini':'ini',  '.conf':'ini',  '.cfg':'ini',
+        '.sh':'sh',          '.bash':'sh',   '.zsh':'sh',   '.fish':'sh',
+        '.md':'markdown',
+        '.sql':'sql',
+        '.go':'golang',
+        '.rs':'rust',
+        '.java':'java',
+        '.c':'c_cpp',        '.h':'c_cpp',
+        '.cpp':'c_cpp',      '.cxx':'c_cpp', '.cc':'c_cpp', '.hpp':'c_cpp',
+        '.php':'php',
+        '.rb':'ruby',
+        '.kt':'kotlin',      '.kts':'kotlin',
+        '.swift':'swift',
+        '.r':'r',
+        '.lua':'lua',
+        '.dockerfile':'dockerfile',
+        '.env':'sh',
+        '.log':'text',       '.txt':'text',  '.csv':'text',
+    };
+
     const TEXT_EXTS = new Set(Object.keys(EXT_LANG));
     const IMG_EXTS  = new Set(['.png','.jpg','.jpeg','.gif','.svg','.webp','.bmp','.ico','.avif']);
     const VID_EXTS  = new Set(['.mp4','.webm','.ogv','.mov','.avi','.mkv']);
     const AUD_EXTS  = new Set(['.mp3','.wav','.oga','.flac','.aac','.opus','.m4a']);
     const ZIP_EXTS  = new Set(['.zip','.tar','.gz','.tgz','.bz2','.xz','.7z','.rar']);
 
-    // ─── Icon lookup ──────────────────────────────────────────────────────────
-    // Build a flat map so we avoid chained-key syntax errors
+    
+    
     const _iconEntries = [
         [['fa-brands fa-js'],          ['.js','.mjs','.cjs']],
         [['fa-brands fa-js'],          ['.ts','.tsx']],
@@ -125,7 +171,6 @@
         if (el) el.textContent = msg;
     }
 
-    // ─── Upload progress overlay ──────────────────────────────────────────────
     function showUploadOverlay(label) {
         let ov = document.getElementById('fmUploadOverlay');
         if (!ov) {
@@ -164,7 +209,6 @@
         document.getElementById('fmUploadOverlay')?.classList.remove('visible');
     }
 
-    // ─── Spinner overlay on fm-content (for compress/extract) ────────────────
     function showContentSpinner(msg) {
         const c = document.getElementById('fmContent');
         if (!c) return;
@@ -185,7 +229,6 @@
         document.querySelector('#fmContent .fm-spinner-overlay')?.remove();
     }
 
-    // ─── Breadcrumb ───────────────────────────────────────────────────────────
     function renderBreadcrumb(p) {
         const el = document.getElementById('fmBreadcrumb');
         if (!el) return;
@@ -209,7 +252,6 @@
         });
     }
 
-    // ─── Navigate ─────────────────────────────────────────────────────────────
     async function fmNavigate(targetPath) {
         setStatus('Loading…');
         try {
@@ -229,7 +271,6 @@
         } catch (err) { setStatus('Error: ' + err.message); }
     }
 
-    // ─── Render entries ───────────────────────────────────────────────────────
     function renderEntries() {
         const container = document.getElementById('fmContent');
         if (!container) return;
@@ -280,7 +321,6 @@
             </tbody>
           </table>`;
 
-        // Row click: dir → navigate; select mode → toggle
         container.querySelectorAll('.fm-row').forEach(row => {
             row.addEventListener('click', e => {
                 if (e.target.closest('button,input')) return;
@@ -291,7 +331,6 @@
                     fmNavigate(fmCurrentPath === '/' ? '/' + entry.name : fmCurrentPath + '/' + entry.name);
                 }
             });
-            // Double-click: open viewer/editor
             row.addEventListener('dblclick', async e => {
                 if (e.target.closest('button,input')) return;
                 const idx = parseInt(row.dataset.idx);
@@ -300,7 +339,6 @@
             });
         });
 
-        // Action buttons
         container.querySelectorAll('.fm-action-btn').forEach(btn => {
             btn.addEventListener('click', async e => {
                 e.stopPropagation();
@@ -325,7 +363,6 @@
             });
         });
 
-        // Checkboxes
         if (fmSelectMode) {
             document.getElementById('fmCheckAll')?.addEventListener('change', e => {
                 if (e.target.checked) fmEntries.forEach((_, i) => fmSelected.add(i));
@@ -372,12 +409,10 @@
         }
     }
 
-    // ─── File viewer / editor modal ───────────────────────────────────────────
     async function openFileViewer(entry, startEdit) {
         const fullPath = (fmCurrentPath === '/' ? '' : fmCurrentPath) + '/' + entry.name;
         const ext = entry.ext.toLowerCase();
 
-        // Image
         if (IMG_EXTS.has(ext)) {
             const url = `/api/fm/download?path=${encodeURIComponent(fullPath)}`;
             buildMediaModal('image', entry.name, `
@@ -387,7 +422,6 @@
             return;
         }
 
-        // Video
         if (VID_EXTS.has(ext)) {
             const url = `/api/fm/download?path=${encodeURIComponent(fullPath)}`;
             buildMediaModal('video', entry.name, `
@@ -400,7 +434,6 @@
             return;
         }
 
-        // Audio
         if (AUD_EXTS.has(ext)) {
             const url = `/api/fm/download?path=${encodeURIComponent(fullPath)}`;
             buildMediaModal('audio', entry.name, `
@@ -414,7 +447,6 @@
             return;
         }
 
-        // Text / code
         if (TEXT_EXTS.has(ext) || ext === '') {
             setStatus('Loading file…');
             try {
@@ -427,11 +459,9 @@
             return;
         }
 
-        // Fallback: download
         window.open(`/api/fm/download?path=${encodeURIComponent(fullPath)}`, '_blank');
     }
 
-    // ─── Media modal ──────────────────────────────────────────────────────────
     function buildMediaModal(type, title, bodyHtml) {
         document.getElementById('fmViewerModal')?.remove();
         const modal = document.createElement('div');
@@ -454,7 +484,6 @@
         requestAnimationFrame(() => modal.classList.add('fm-viewer-visible'));
     }
 
-    // ─── Code viewer / editor modal ───────────────────────────────────────────
     function buildCodeModal(entry, fullPath, content, startEdit) {
         document.getElementById('fmViewerModal')?.remove();
 
@@ -498,15 +527,22 @@
         const tabEdit    = document.getElementById('fmTabEdit');
 
         let currentMode = startEdit ? 'edit' : 'view';
-        let editorTextarea = null;
+        let aceEditor = null;
+
+        function destroyAce() {
+            if (aceEditor) {
+                try { aceEditor.destroy(); } catch (_) {}
+                aceEditor = null;
+            }
+        }
 
         function showView() {
+            destroyAce();
             currentMode = 'view';
             tabView?.classList.add('active');
             tabEdit?.classList.remove('active');
             if (footer) footer.style.display = 'none';
 
-            // Use highlight.js if available
             if (window.hljs && lang !== 'plaintext') {
                 const highlighted = hljs.highlight(content, { language: lang, ignoreIllegals: true }).value;
                 body.innerHTML = `<pre class="fm-code-block hljs language-${lang}"><code>${highlighted}</code></pre>`;
@@ -516,29 +552,49 @@
         }
 
         function showEdit() {
+            destroyAce();
             currentMode = 'edit';
             tabView?.classList.remove('active');
             tabEdit?.classList.add('active');
             if (footer) footer.style.display = 'flex';
             if (saveStatus) saveStatus.textContent = '';
 
-            body.innerHTML = `<textarea class="fm-code-editor" id="fmCodeTextarea" spellcheck="false"></textarea>`;
-            editorTextarea = document.getElementById('fmCodeTextarea');
-            editorTextarea.value = content;
-            editorTextarea.focus();
+            if (window.ace) {
+                body.innerHTML = `<div id="fmAceEditor" style="width:100%;height:100%;min-height:400px;"></div>`;
+                const aceMode = ACE_LANG[entry.ext.toLowerCase()] || 'text';
+                aceEditor = ace.edit('fmAceEditor');
+                aceEditor.setTheme('ace/theme/one_dark');
+                aceEditor.session.setMode('ace/mode/' + aceMode);
+                aceEditor.setValue(content, -1);
+                aceEditor.setOptions({
+                    fontSize: '13px',
+                    fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+                    showPrintMargin: false,
+                    wrap: false,
+                    tabSize: 2,
+                    useSoftTabs: true,
+                    scrollPastEnd: 0.3,
+                    highlightActiveLine: true,
+                    showGutter: true,
+                });
+                aceEditor.focus();
+            } else {
+                body.innerHTML = `<textarea class="fm-code-editor" id="fmCodeTextarea" spellcheck="false"></textarea>`;
+                const ta = document.getElementById('fmCodeTextarea');
+                ta.value = content;
+                ta.focus();
+            }
         }
 
-        // Show initial mode
         if (startEdit && canEdit) showEdit(); else showView();
 
         tabView?.addEventListener('click', () => { if (currentMode !== 'view') showView(); });
         tabEdit?.addEventListener('click', () => { if (currentMode !== 'edit') showEdit(); });
 
-        // Save
         saveBtn?.addEventListener('click', async () => {
-            const textarea = document.getElementById('fmCodeTextarea');
-            if (!textarea) return;
-            const newContent = textarea.value;
+            const newContent = aceEditor
+                ? aceEditor.getValue()
+                : (document.getElementById('fmCodeTextarea')?.value ?? '');
             if (saveStatus) saveStatus.textContent = 'Saving…';
             saveBtn.disabled = true;
             try {
@@ -549,7 +605,6 @@
                 });
                 const d = await r.json();
                 if (d.ok) {
-                    // Update local content reference so View tab is up-to-date
                     content = newContent;
                     if (saveStatus) {
                         saveStatus.textContent = '✓ Saved';
@@ -566,6 +621,7 @@
 
         cancelBtn?.addEventListener('click', () => { showView(); });
 
+        modal._fmCleanup = destroyAce;
         modal.addEventListener('click', e => { if (e.target === modal) closeViewer(); });
         document.getElementById('fmViewerClose')?.addEventListener('click', closeViewer);
         requestAnimationFrame(() => modal.classList.add('fm-viewer-visible'));
@@ -574,11 +630,11 @@
     function closeViewer() {
         const modal = document.getElementById('fmViewerModal');
         if (!modal) return;
+        if (typeof modal._fmCleanup === 'function') modal._fmCleanup();
         modal.classList.remove('fm-viewer-visible');
         setTimeout(() => modal.remove(), 200);
     }
 
-    // ─── File operations ──────────────────────────────────────────────────────
     async function fmDelete(paths) {
         setStatus('Deleting…');
         try {
@@ -631,7 +687,6 @@
         finally { hideContentSpinner(); }
     }
 
-    // ─── Upload with progress ─────────────────────────────────────────────────
     function handleUpload(files) {
         if (!files || !files.length) return;
         const totalSize = [...files].reduce((s, f) => s + f.size, 0);
@@ -679,7 +734,6 @@
         xhr.send(formData);
     }
 
-    // ─── Drag-and-drop upload ─────────────────────────────────────────────────
     function setupDragDrop(container) {
         container.addEventListener('dragover', e => {
             e.preventDefault();
@@ -693,7 +747,6 @@
         });
     }
 
-    // ─── Rename dialog ────────────────────────────────────────────────────────
     let renameCurrentPath = null;
     function openRenameDialog(name, fullPath) {
         renameCurrentPath = fullPath;
@@ -729,7 +782,6 @@
         } catch (err) { setStatus('Rename failed: ' + err.message); }
     }
 
-    // ─── Init ─────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
         const content = document.getElementById('fmContent');
         if (!content) return;
@@ -742,7 +794,6 @@
             fmNavigate((fmUserRoot === '/' || parent.startsWith(fmUserRoot)) ? parent : fmUserRoot);
         });
 
-        // New folder
         document.getElementById('fmNewFolderBtn')?.addEventListener('click', () => {
             document.getElementById('newFolderName').value = '';
             document.getElementById('newFolderError')?.classList.add('hidden');
@@ -765,7 +816,6 @@
         });
         document.getElementById('newFolderName')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('confirmNewFolder')?.click(); });
 
-        // New file
         document.getElementById('fmNewFileBtn')?.addEventListener('click', () => {
             document.getElementById('newFileName').value = '';
             document.getElementById('newFileError')?.classList.add('hidden');
@@ -788,13 +838,11 @@
         });
         document.getElementById('newFileName')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('confirmNewFile')?.click(); });
 
-        // Upload
         document.getElementById('fmUploadInput')?.addEventListener('change', e => {
             if (e.target.files.length) handleUpload(e.target.files);
             e.target.value = '';
         });
 
-        // Select mode
         document.getElementById('fmSelectModeBtn')?.addEventListener('click', () => {
             fmSelectMode = !fmSelectMode;
             fmSelected.clear();
@@ -835,7 +883,6 @@
             fmSelected.clear(); renderEntries();
         });
 
-        // Rename confirm
         document.getElementById('confirmRename')?.addEventListener('click', () => {
             const name = document.getElementById('renameName').value.trim();
             if (name) doRename(name);
@@ -844,15 +891,12 @@
             if (e.key === 'Enter') document.getElementById('confirmRename')?.click();
         });
 
-        // Drag-drop
         setupDragDrop(content);
 
-        // Keyboard: Escape closes viewer
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeViewer();
         });
 
-        // Watch Files page activation
         const filesPage = document.getElementById('pagFiles');
         if (filesPage) {
             const observer = new MutationObserver(() => {

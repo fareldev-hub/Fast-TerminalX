@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.min.js"></script>
     <script src="/js/dialog.js"></script>
 </head>
 <body>
@@ -18,7 +19,7 @@
     <div class="app-layout">
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-        <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+        
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -93,7 +94,7 @@
             </div>
         </aside>
 
-        <!-- ── Main content ────────────────────────────────────────────── -->
+        
         <div class="main-content">
             <header class="header">
                 <div class="header-left">
@@ -124,7 +125,7 @@
 
             <div class="pages-container">
 
-                <!-- ── Terminal page ────────────────────────────────── -->
+                
                 <div class="page page-terminal active" id="pagTerminal">
                     <div class="terminal-grid is-empty" id="terminalGrid">
                         <div class="empty-state">
@@ -136,10 +137,10 @@
                     </div>
                 </div>
 
-                <!-- ── File Manager page ────────────────────────────── -->
+                
                 <div class="page page-files" id="pagFiles">
                     <div class="fm-layout">
-                        <!-- Toolbar -->
+                        
                         <div class="fm-toolbar">
                             <div class="fm-toolbar-left">
                                 <button class="fm-btn" id="fmUpBtn" title="Go up"><i class="fas fa-level-up-alt"></i></button>
@@ -168,24 +169,24 @@
                             </div>
                         </div>
 
-                        <!-- Selection info bar -->
+                        
                         <div class="fm-sel-bar hidden" id="fmSelBar">
                             <span id="fmSelCount">0 items selected</span>
                             <button class="fm-btn fm-btn-sm" id="fmSelAllBtn"><i class="fas fa-check-double"></i> All</button>
                             <button class="fm-btn fm-btn-sm" id="fmSelNoneBtn"><i class="fas fa-square"></i> None</button>
                         </div>
 
-                        <!-- File list -->
+                        
                         <div class="fm-content" id="fmContent">
                             <div class="fm-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
                         </div>
 
-                        <!-- Status bar -->
+                        
                         <div class="fm-statusbar" id="fmStatusBar">Ready</div>
                     </div>
                 </div>
 
-                <!-- ── Connect page ─────────────────────────────────── -->
+                
                 <div class="page page-connect" id="pagConnect">
                     <div class="connect-container">
                         <div class="page-hero">
@@ -195,7 +196,7 @@
                         </div>
 
                         <div class="connect-grid">
-                            <!-- SSH -->
+                            
                             <div class="connect-card" id="sshCard">
                                 <div class="connect-card-icon blue"><i class="fas fa-network-wired"></i></div>
                                 <div class="connect-card-body">
@@ -207,7 +208,7 @@
                                 </button>
                             </div>
 
-                            <!-- Ngrok -->
+                            
                             <div class="connect-card admin-only hidden" id="ngrokCard">
                                 <div class="connect-card-icon orange"><i class="fas fa-cloud"></i></div>
                                 <div class="connect-card-body">
@@ -221,7 +222,7 @@
 
                         </div>
 
-                        <!-- Tunnel status card -->
+                        
                         <div class="tunnel-status-card" id="tunnelStatusCard" style="display:none;">
                             <div class="tunnel-status-header">
                                 <i class="fas fa-circle-check" style="color:var(--neon-green)"></i>
@@ -237,7 +238,7 @@
                     </div>
                 </div>
 
-                <!-- ── Admin page ───────────────────────────────────── -->
+                
                 <div class="page page-admin admin-only" id="pagAdmin">
                     <div class="admin-container">
                         <div class="page-hero">
@@ -271,7 +272,7 @@
                             </div>
                             <div class="stat-url-row" id="statUrlRow" style="display:none;">
                                 <span class="stat-url-label">URL</span>
-                                <span class="stat-url" id="statUrl">—</span>
+                                <a class="stat-url" id="statUrl" href="#" target="_blank" rel="noopener">—</a>
                                 <button class="btn btn-small" id="copyStatUrl"><i class="fas fa-copy"></i></button>
                             </div>
                         </div>
@@ -290,7 +291,7 @@
                     </div>
                 </div>
 
-                <!-- ── Packages page ───────────────────────────────── -->
+                
                 <div class="page page-packages" id="pagPackages">
                     <div class="pkg-container">
                         <div class="page-hero">
@@ -343,7 +344,7 @@
                                 </div>
                             </div>
                             <pre class="pkg-output" id="pkgOutput"><span class="pkg-placeholder">Ready — enter package name(s) above and click Install.</span></pre>
-                            <!-- stdin prompt bar — shown when process awaits input -->
+                            
                             <div class="pkg-stdin-row hidden" id="pkgStdinRow">
                                 <span class="pkg-stdin-label"><i class="fas fa-keyboard"></i> Input required</span>
                                 <div class="pkg-stdin-inner">
@@ -359,7 +360,7 @@
                     </div>
                 </div>
 
-                <!-- ── About page ───────────────────────────────────── -->
+                
                 <div class="page page-about" id="pagAbout">
                     <div class="about-container">
                         <div class="about-hero">
@@ -420,7 +421,7 @@
                     </div>
                 </div>
 
-                <!-- ── Donate page ──────────────────────────────────── -->
+                
                 <div class="page page-donate" id="pagDonate">
                     <div class="donate-container">
                         <div class="donate-hero">
@@ -457,11 +458,11 @@
                     </div>
                 </div>
 
-            </div><!-- /pages-container -->
-        </div><!-- /main-content -->
-    </div><!-- /app-layout -->
+            </div>
+        </div>
+    </div>
 
-    <!-- ── SSH Dialog ────────────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="sshModalOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -496,7 +497,7 @@
         </div>
     </div>
 
-    <!-- ── Ngrok Dialog ──────────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="ngrokModalOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -525,7 +526,7 @@
         </div>
     </div>
 
-    <!-- ── Add User Dialog ───────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="addUserModalOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -575,7 +576,7 @@
         </div>
     </div>
 
-    <!-- ── Edit User Dialog ──────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="editUserModalOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -614,7 +615,7 @@
         </div>
     </div>
 
-    <!-- ── New Folder Dialog ─────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="newFolderOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -635,7 +636,7 @@
         </div>
     </div>
 
-    <!-- ── New File Dialog ───────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="newFileOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -656,7 +657,7 @@
         </div>
     </div>
 
-    <!-- ── Rename Dialog ─────────────────────────────────────────────── -->
+    
     <div class="modal-overlay hidden" id="renameOverlay">
         <div class="modal">
             <div class="modal-header">
