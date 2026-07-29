@@ -13,8 +13,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-red?style=for-the-badge)](LICENSE)
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)](https://github.com/yourusername/f-termx/pulls)
-[![Made with Love](https://img.shields.io/badge/Made%20with-Love-red?style=for-the-badge)](https://github.com/yourusername/f-termx)
 
 </div>
 
