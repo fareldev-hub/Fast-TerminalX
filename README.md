@@ -150,10 +150,8 @@ Follow the interactive prompts, or use the Admin Panel web interface.
 
 [![NPM Stats - f-termx](https://img.shields.io/badge/NPM%20Stats-f--termx-blue?style=for-the-badge)](https://tanstack.com/stats/npm?packageGroups=[{"packages":[{"name":"f-termx"}]}]&range=365-days&binType=daily)
 
-[![NPM Total Downloads](https://img.shields.io/npm/dt/f-termx?style=for-the-badge&label=Total%20Downloads)](https://www.npmjs.com/package/f-termx)
 [![NPM Monthly Downloads](https://img.shields.io/npm/dm/f-termx?style=for-the-badge&label=Monthly%20Downloads)](https://www.npmjs.com/package/f-termx)
 [![NPM Weekly Downloads](https://img.shields.io/npm/dw/f-termx?style=for-the-badge&label=Weekly%20Downloads)](https://www.npmjs.com/package/f-termx)
-[![NPM Version](https://img.shields.io/npm/v/f-termx?style=for-the-badge&label=Version)](https://www.npmjs.com/package/f-termx)
 
 ---
 
