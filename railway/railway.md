@@ -91,6 +91,14 @@ Make sure you have:
    bash <(curl -fsSL railway.com/install.sh) -y
    ```
 
+Once you've finished logging in to the railway, use the command:
+
+```bash
+railway login
+```
+
+Then paste the SSH command from railway into GitHub.
+
    !["image"](documentation/11.png)
 
 ---
