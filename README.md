@@ -1,7 +1,7 @@
 
 <div align="center">
   
-![Dev Ftermx](thumbnail/thumb.png)
+![DevFtermx](thumbnail/thumb.png)
 
 # Fast-TerminalX (Ftermx)
 
