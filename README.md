@@ -1,4 +1,3 @@
-
 <div align="center">
   
 ![DevFtermx](thumbnail/thumb.png)
@@ -15,6 +14,7 @@
 [![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
 
 </div>
+
 
 ---
 
@@ -41,6 +41,12 @@ Make sure you have the following installed on your system:
 | Node.js | 18+ | `node --version` |
 | npm | Latest | `npm --version` |
 | SSH Client | Any | `ssh -V` |
+
+## Workflow
+
+<div style="background-color: white; padding: 20px; border-radius: 10px;">
+  <img src="./workflow.png" alt="Workflow" style="display: block; margin: 0 auto;" />
+</div>
 
 ---
 
@@ -192,3 +198,4 @@ If you find this project useful, consider supporting its development:
 If you like this project, don't forget to give it a star!
 
 </div>
+
