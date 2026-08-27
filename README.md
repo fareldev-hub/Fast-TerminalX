@@ -44,7 +44,7 @@ Make sure you have the following installed on your system:
 
 ## Workflow
 
-<div style="background-color: white; padding: 20px; border-radius: 10px;">
+<div style="background-color: #fff; padding: 20px; border-radius: 10px;">
   <img src="./workflow.png" alt="Workflow" style="display: block; margin: 0 auto;" />
 </div>
 
