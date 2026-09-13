@@ -6,13 +6,6 @@
 
 **SSH Tunnel Application Built with Node.js**
 
-<style>
-img{
-  border-radius: 10px;
-  box-shadow: 2px 2px 10px #0005;
-}
-</style>
-
 [![npm version](https://img.shields.io/npm/v/f-termx?style=for-the-badge&color=blue)](https://www.npmjs.com/package/f-termx)
 [![npm downloads](https://img.shields.io/npm/dt/f-termx?style=for-the-badge&color=green)](https://www.npmjs.com/package/f-termx)
 [![npm downloads per month](https://img.shields.io/npm/dm/f-termx?style=for-the-badge&color=orange)](https://www.npmjs.com/package/f-termx)
@@ -28,6 +21,9 @@ Fast-Terminalx (or ftermx) is a terminal tool for Node.js-based server tunneling
 
 You can use Railway for the installation:
 Railway is a versatile cloud platform and Platform as a Service (PaaS) that allows developers to quickly deploy web applications, servers, databases, and other full-stack services without having to manually manage infrastructure.
+
+## Workflow
+![doc](workflow.png)
 
 Here is how to get a free 30-day VPS on Railway and connect it to ftermx:
 
